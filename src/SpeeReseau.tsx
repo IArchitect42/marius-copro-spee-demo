@@ -12,10 +12,10 @@ const VILLES: [string, string][] = [["Lille", "MEL"], ["Roubaix", "MEL"], ["Tour
 const NOMS = ["Les Tilleuls", "Le Beffroi", "Les Hortensias", "Le Parc", "Les Acacias", "Jean Jaurès", "Les Peupliers", "La Citadelle", "Le Belvédère", "Les Glycines", "Victor Hugo", "Le Square", "Les Marronniers", "La Roseraie", "Le Cèdre", "Les Charmilles", "Le Moulin", "Pasteur", "Les Iris", "La Colline"];
 export const PHASES = ["0 · Identification", "1 · Diagnostic", "2 · Études", "3 · AG & dépôt", "4 · Montage financier", "5 · Chantier", "6 · Réception", "7 · Post-travaux"];
 type Copro = { id: string; nom: string; ville: string; terr: string; lots: number; mode: "Full" | "Solo"; operateur: string; co: string; phase: number; avTravaux: number; avHono: number; budget: number; rac: number; dpe: string; alerte?: string; vauban?: boolean };
-const COS = ["Lucie D.", "Alice M.", "Thomas R.", "Inès B.", "Karim L."];
+const COS = ["Claire V.", "Mathieu P.", "Thomas R.", "Inès B.", "Karim L."];
 export const COPROS: Copro[] = (() => {
   const r = rng(42); const out: Copro[] = [];
-  out.push({ id: "C001", nom: "La Résidence Vauban", ville: "Lille", terr: "MEL", lots: 12, mode: "Full", operateur: "SPEE (MOD directe)", co: "Lucie D.", phase: 5, avTravaux: 47, avHono: 63, budget: 290950, rac: 101808, dpe: "E → C", alerte: "Facture THERMIS à valider", vauban: true });
+  out.push({ id: "C001", nom: "La Résidence Vauban", ville: "Lille", terr: "MEL", lots: 12, mode: "Full", operateur: "SPEE (MOD directe)", co: "Claire V.", phase: 5, avTravaux: 47, avHono: 63, budget: 290950, rac: 101808, dpe: "E → C", alerte: "Facture THERMIS à valider", vauban: true });
   for (let i = 2; i <= 80; i++) {
     const [ville, terr] = VILLES[Math.floor(r() * VILLES.length)];
     const solo = i % 2 === 0; const phase = Math.floor(r() * 8); const lots = 8 + Math.floor(r() * 60);

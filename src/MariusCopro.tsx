@@ -2238,7 +2238,7 @@ const SIGN_DOCS: SignDoc[] = [
     signataires: [
       { name:"M. Fontaine",    email:"p.fontaine@gmail.com",         role:"Président du Conseil syndical", signedAt:"28/01/2025 14:55" },
       { name:"Mme Leclercq",  email:"c.leclercq@orange.fr",         role:"Membre du Conseil syndical",    signedAt:"28/01/2025 17:22" },
-      { name:"Sebastian Ruiz",email:"sebastian@marius-renov.fr",    role:"AMO Copro — Marius Rénov'",     signedAt:"28/01/2025 15:03" },
+      { name:"Sebastian Ruiz",email:"amo.demo@marius-renov.fr",    role:"AMO Copro — Marius Rénov'",     signedAt:"28/01/2025 15:03" },
     ],
   },
   {
@@ -2249,7 +2249,7 @@ const SIGN_DOCS: SignDoc[] = [
     docs: ["Lettre de mission AMO"],
     signataires: [
       { name:"M. Fontaine",    email:"p.fontaine@gmail.com",         role:"Président du Conseil syndical", signedAt:"17/01/2025 10:14" },
-      { name:"Sebastian Ruiz",email:"sebastian@marius-renov.fr",    role:"AMO Copro — Marius Rénov'",     signedAt:"15/01/2025 16:20" },
+      { name:"Sebastian Ruiz",email:"amo.demo@marius-renov.fr",    role:"AMO Copro — Marius Rénov'",     signedAt:"15/01/2025 16:20" },
     ],
   },
   {
@@ -9542,7 +9542,7 @@ export default function MariusCopro() {
   const COLL_PRODS = ["ecoptz-coll","prefin-coll","affecte-coll"];
 
   const [pool, setPool] = useState<Accompagnateur[]>([
-    {id:"sr",  nom:"Sebastian Ruiz",     organisation:"Atelier d'Architecture Tripode",  email:"sebastian@marius-renov.fr",  role:"AMO Copropriété",    statut:"actif",   produits:ALL_PRODS, avatar:"SR",  avatarColor:"#213F4C"},
+    {id:"sr",  nom:"Sebastian Ruiz",     organisation:"Atelier d'Architecture Tripode",  email:"amo.demo@marius-renov.fr",  role:"AMO Copropriété",    statut:"actif",   produits:ALL_PRODS, avatar:"SR",  avatarColor:"#213F4C"},
     {id:"a02", nom:"Marie Leconte",      organisation:"Cabinet Leconte Énergie",         email:"m.leconte@leconte-energie.fr",role:"CDPE Individuel",    statut:"actif",   produits:[...ECOPTZ_PRODS,...PREFIN_PRODS,"affecte-ind"], avatar:"ML", avatarColor:"#7A00B3"},
     {id:"a03", nom:"Pierre Adami",       organisation:"BET Thermique Adami",             email:"p.adami@bet-adami.fr",        role:"BET Thermique",      statut:"actif",   produits:["ecoptz-ind","ecoptz-glob","affecte-ind","ecoptz-coll"], avatar:"PA", avatarColor:"#587A89"},
     {id:"a04", nom:"Sophie Dufresne",    organisation:"Habitat Conseil 59",              email:"s.dufresne@habitatconseil59.fr",role:"AMO Copropriété",  statut:"actif",   produits:ALL_PRODS, avatar:"SD", avatarColor:"#D32F2F"},
@@ -11854,7 +11854,7 @@ export default function MariusCopro() {
               </div>
               <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(320px,1fr))",gap:"14px"}}>
                 {[
-                  {ini:"SR",bg:C.secondary,nom:"Sebastian Ruiz",role:"AMO Copro — Marius Rénov'",org:"Atelier d'Architecture Marius",email:"sebastian@marius-renov.fr",tel:"06 12 34 56 78",missions:["Mission MAR","Mission Audit","Mission MPA","Mission MPLD"],phase:"Phase 5 — Réalisation travaux"},
+                  {ini:"SR",bg:C.secondary,nom:"Sebastian Ruiz",role:"AMO Copro — Marius Rénov'",org:"Atelier d'Architecture Marius",email:"amo.demo@marius-renov.fr",tel:"06 12 34 56 78",missions:["Mission MAR","Mission Audit","Mission MPA","Mission MPLD"],phase:"Phase 5 — Réalisation travaux"},
                   {ini:"AT",bg:"#7A00B3",nom:"Atelier Tripode",role:"Maîtrise d'œuvre",org:"Atelier Tripode Architecture",email:"contact@ateliertripo.de.fr",tel:"03 20 44 55 66",missions:["Conception","VISA","DET","AOR"],phase:"Phase 5 — Supervision chantier"},
                   {ini:"ME",bg:"#388E3C",nom:"Maison de l'Énergie",role:"ECFR — Espace Conseil France Rénov'",org:"MEL — Métropole Européenne de Lille",email:"contact@maisonenergie-lille.fr",tel:"03 20 21 84 53",missions:["Conseil aides","Accompagnement social","DPE"],phase:"Permanences mar. & jeu."},
                 ].map(a=>(
