@@ -2,9 +2,10 @@
 // (besoins exprimés par l'équipe copro du SPEE lors des échanges et sur l'analyse des outils).
 // Données fictives de démonstration.
 import React, { useEffect, useMemo, useState } from "react";
+import CreerCopro from "./CreerCopro";
 import { T, F, txt, fmtE, Icon, Button, Tag, BlockWrapper, KeyValue, AlertBlock, Segmented, TabMenu, Input, Select, Checkbox, th, td, Progress, MenuEntry, downloadCSV, TagStatus } from "./ds";
 
-type Page = "portefeuille" | "recap" | "qualification" | "financement" | "tresorerie" | "operateurs" | "reporting" | "coconstruction";
+type Page = "nouvelle" | "portefeuille" | "recap" | "qualification" | "financement" | "tresorerie" | "operateurs" | "reporting" | "coconstruction";
 
 // ── Données fictives ───────────────────────────────────────────────────
 function rng(seed: number) { return () => { seed = (seed * 16807) % 2147483647; return (seed - 1) / 2147483646; }; }
@@ -40,6 +41,7 @@ export default function SpeeView({ profiles, onSwitch }: { profiles: Profile[]; 
   const MENU: { section: string; items: { p: Page; label: string; icon: string; badge?: string }[] }[] = [
     { section: "MON RÉSEAU", items: [
       { p: "portefeuille", label: "Portefeuille", icon: "buildings" },
+      { p: "nouvelle", label: "Nouvelle copro", icon: "plus-circle", badge: "API" },
       { p: "recap", label: "RECAP avancement", icon: "list-checks" },
       { p: "qualification", label: "Qualification", icon: "funnel" },
       { p: "financement", label: "Financement copros", icon: "piggy-bank" },
@@ -90,6 +92,7 @@ export default function SpeeView({ profiles, onSwitch }: { profiles: Profile[]; 
       <main style={{ flex: 1, overflowY: "auto", background: T.white }}>
         <div style={{ maxWidth: 1280, margin: "0 auto", padding: "32px 40px 64px", display: "flex", flexDirection: "column", gap: 32 }}>
           {page === "portefeuille" && <Portefeuille go={go} onOpenVauban={() => onSwitch("amo")} onOpenLight={() => onSwitch("light")} />}
+          {page === "nouvelle" && <CreerCopro />}
           {page === "recap" && <Recap coproId={selCopro} setCopro={setSelCopro} />}
           {page === "qualification" && <Qualification />}
           {page === "financement" && <Financement />}
@@ -131,7 +134,7 @@ export function Portefeuille({ go, onOpenVauban, onOpenLight }: { go: (p: Page, 
   const exp = () => downloadCSV("portefeuille-spee.csv", [["Réf", "Copropriété", "Ville", "Territoire", "Lots", "Mode", "Opérateur", "Chargé d'opération", "Phase", "Avancement travaux %", "Avancement honoraires %", "Budget TTC", "Reste à charge", "DPE", "Alerte"],
     ...rows.map(c => [c.id, c.nom, c.ville, c.terr, c.lots, c.mode, c.operateur, c.co, PHASES[c.phase], c.avTravaux, c.avHono, c.budget, c.rac, c.dpe, c.alerte || ""])]);
   return (<>
-    <PageTitle title="Portefeuille copropriétés" sub="Vision agrégée des projets en MOD directe et sous pacte" />
+    <PageTitle title="Portefeuille copropriétés" sub="Vision agrégée des projets en MOD directe et sous pacte" right={<Button size="Small" aspect="Plain" icon="plus-circle" label="Nouvelle copropriété" onClick={() => go("nouvelle")} />} />
     <div style={{ display: "flex", gap: 16, flexWrap: "wrap" }}>
       <Stat k="Copropriétés actives" v="80" sub={`${lots.toLocaleString("fr-FR")} logements`} />
       <Stat k="MOD directe (Full)" v={String(COPROS.filter(c => c.mode === "Full").length)} sub="Équipes SPEE" />
