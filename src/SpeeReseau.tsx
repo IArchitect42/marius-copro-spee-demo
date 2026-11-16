@@ -1,5 +1,5 @@
 // Profil « SPEE Hauts-de-France (compte réseau) » : réponses aux besoins exprimés par le SPEE
-// (mails de Lucie Diop, commentaires d'Alice Morcrette sur l'analyse des outils, offre).
+// (besoins exprimés par l'équipe copro du SPEE lors des échanges et sur l'analyse des outils).
 // Données fictives de démonstration.
 import React, { useEffect, useMemo, useState } from "react";
 import { T, F, txt, fmtE, Icon, Button, Tag, BlockWrapper, KeyValue, AlertBlock, Segmented, TabMenu, Input, Select, Checkbox, th, td, Progress, MenuEntry, downloadCSV, TagStatus } from "./ds";
