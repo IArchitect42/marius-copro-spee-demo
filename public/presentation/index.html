@@ -163,7 +163,7 @@ td{padding:1vh 1.4vh;border-bottom:1px solid var(--n300)}
 </section>
 
 <!-- 6 bis -->
-<section class="slide" data-demo="../?vue=amo&onglet=documents" data-notes="Démo : onglet Documents › « Déposer » sur un document attendu (ex. Facture solde THERMIS BTP) ou « Déposer un document » › exemple « Facture de solde THERMIS BTP ». Montrer les 4 étapes de lecture, les champs extraits en violet, le point d'attention en orange (réception non prononcée), puis « Valider et transcrire ». Rappeler : aujourd'hui ces pièces dorment dans OneDrive ou SharePoint et sont ressaisies dans les Excel. ❓ Combien de pièces recevez-vous par dossier ? Où sont-elles rangées aujourd'hui ?">
+<section class="slide" data-demo="../?cadre=audit" data-scale="0.62" data-notes="Démo : onglet Documents › « Déposer » sur un document attendu (ex. Facture solde THERMIS BTP) ou « Déposer un document » › exemple « Facture de solde THERMIS BTP ». Montrer les 4 étapes de lecture, les champs extraits en violet, le point d'attention en orange (réception non prononcée), puis « Valider et transcrire ». Rappeler : aujourd'hui ces pièces dorment dans OneDrive ou SharePoint et sont ressaisies dans les Excel. ❓ Combien de pièces recevez-vous par dossier ? Où sont-elles rangées aujourd'hui ?">
   <div class="kicker">2 bis · Les documents</div>
   <div class="split">
     <div class="answers">
@@ -223,7 +223,7 @@ td{padding:1vh 1.4vh;border-bottom:1px solid var(--n300)}
 </section>
 
 <!-- 10 -->
-<section class="slide" data-demo="../?vue=amo&onglet=documents&depot=facture" data-notes="La capture à droite est la vraie fonctionnalité : l'entreprise dépose sa facture, Marius IA la lit, extrait les champs (entreprise, SIRET, poste, montants HT/TTC) et signale l'incohérence : solde facturé alors que la réception du lot n'est pas prononcée. Le CO valide, le reste se met à jour. Le SPEE ne saisit que ce qui relève de sa décision.">
+<section class="slide" data-demo="../?cadre=facture" data-scale="0.62" data-notes="La capture à droite est la vraie fonctionnalité : l'entreprise dépose sa facture, Marius IA la lit, extrait les champs (entreprise, SIRET, poste, montants HT/TTC) et signale l'incohérence : solde facturé alors que la réception du lot n'est pas prononcée. Le CO valide, le reste se met à jour. Le SPEE ne saisit que ce qui relève de sa décision.">
   <div class="kicker">5 bis · Une facture, une seule saisie</div>
   <div class="split">
     <div class="answers">
@@ -239,7 +239,7 @@ td{padding:1vh 1.4vh;border-bottom:1px solid var(--n300)}
       <p class="lead" style="max-width:100%;margin:0">La facture n'est saisie qu'une fois : les autres tableaux deviennent des vues de cette facture.</p>
       <a class="btn" target="_blank" href="../?vue=amo&onglet=documents&depot=facture"><i class="ph-light ph-arrow-square-in"></i>Basculer sur la démo</a>
     </div>
-    <div class="demo"><div class="frame"></div><div class="replaces">Dépôt d'une facture de solde : champs extraits par Marius IA (violet) et point d'attention (orange)</div></div>
+    <div class="demo"><div class="frame"></div><div class="replaces">Dépôt d'une facture de solde : champs extraits par Marius IA (violet) et point d'attention (orange). La fenêtre défile : cliquez dedans pour parcourir les champs.</div></div>
   </div>
 </section>
 
@@ -343,7 +343,7 @@ slides.forEach((s,i)=>{const f=document.createElement('div');f.className='foot';
 let cur=0;
 function show(i){cur=Math.max(0,Math.min(slides.length-1,i));slides.forEach((s,k)=>s.classList.toggle('active',k===cur));
   const s=slides[cur];const fr=s.querySelector('.frame');
-  if(fr&&s.dataset.demo&&!fr.querySelector('iframe')){fr.innerHTML='<div class="ph">Chargement de la démo…</div>';const ifr=document.createElement('iframe');ifr.src=s.dataset.demo;ifr.loading='lazy';ifr.onload=()=>{const ph=fr.querySelector('.ph');ph&&ph.remove();};fr.appendChild(ifr);}
+  if(fr&&s.dataset.demo&&!fr.querySelector('iframe')){fr.innerHTML='<div class="ph">Chargement de la démo…</div>';const ifr=document.createElement('iframe');ifr.src=s.dataset.demo;const sc=parseFloat(s.dataset.scale||'0.5');ifr.style.transform='scale('+sc+')';ifr.style.width=(100/sc)+'%';ifr.style.height=(100/sc)+'%';ifr.loading='lazy';ifr.onload=()=>{const ph=fr.querySelector('.ph');ph&&ph.remove();};fr.appendChild(ifr);}
   document.getElementById('notesTxt').textContent=s.dataset.notes||'—';history.replaceState(null,'','#'+(cur+1));}
 document.getElementById('prev').onclick=()=>show(cur-1);document.getElementById('next').onclick=()=>show(cur+1);
 const toggleNotes=()=>document.getElementById('notes').classList.toggle('on');

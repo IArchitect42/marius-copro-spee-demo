@@ -115,7 +115,7 @@ const SAMPLES: { label: string; file: string }[] = [
 ];
 const STEPS = ["Lecture du document", "Reconnaissance du type", "Extraction des champs", "Rapprochement avec le dossier"];
 
-export default function DepotIA({ slot, phaseLabel, onClose, onValidate, autoFile }: { slot?: string; phaseLabel?: string; onClose: () => void; onValidate: (r: DepotResult) => void; autoFile?: string }) {
+export default function DepotIA({ slot, phaseLabel, onClose, onValidate, autoFile, inline }: { slot?: string; phaseLabel?: string; onClose: () => void; onValidate: (r: DepotResult) => void; autoFile?: string; inline?: boolean }) {
   const [file, setFile] = useState<string | null>(null);
   const [step, setStep] = useState(-1);
   const [kind, setKind] = useState<DocKind>("autre");
@@ -135,7 +135,7 @@ export default function DepotIA({ slot, phaseLabel, onClose, onValidate, autoFil
   const done = !!data;
 
   return (
-    <div onClick={onClose} style={{ position: "fixed", inset: 0, background: "rgba(19,37,45,0.55)", zIndex: 1100, display: "flex", justifyContent: "center", alignItems: "flex-start", overflowY: "auto", padding: "40px 16px" }}>
+    <div onClick={inline ? undefined : onClose} style={inline ? { padding: 16, background: T.p50, minHeight: "100vh", boxSizing: "border-box", display: "flex", justifyContent: "center", alignItems: "flex-start" } : { position: "fixed", inset: 0, background: "rgba(19,37,45,0.55)", zIndex: 1100, display: "flex", justifyContent: "center", alignItems: "flex-start", overflowY: "auto", padding: "40px 16px" }}>
       <div onClick={e => e.stopPropagation()} style={{ width: 800, maxWidth: "100%", background: T.white, borderRadius: 8, boxShadow: "0 1px 3px rgba(0,0,0,0.25)", display: "flex", flexDirection: "column" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "16px 16px 0 24px" }}>
           <div style={{ flex: 1 }}>
