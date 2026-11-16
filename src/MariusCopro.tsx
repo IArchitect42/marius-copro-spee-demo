@@ -1546,7 +1546,8 @@ const PHASES_DOCS: PhaseDoc[] = [
 function DocumentsTab() {
   const [docSubTab, setDocSubTab] = useState<'documents'|'signatures'>('documents');
   const [phasesDocs, setPhasesDocs] = useState<PhaseDoc[]>(PHASES_DOCS);
-  const [depot, setDepot] = useState<{slot?:string;phaseId?:number}|null>(null);
+  const autoDepot = new URLSearchParams(window.location.search).get("depot");
+  const [depot, setDepot] = useState<{slot?:string;phaseId?:number;auto?:string}|null>(()=>autoDepot==="facture"?{slot:"Facture solde THERMIS BTP",phaseId:5,auto:"facture-solde-thermis.pdf"}:autoDepot==="avis"?{auto:"avis-imposition-lot6.pdf"}:autoDepot==="pv"?{slot:"PV réception ITE",phaseId:5,auto:"pv-reception-ite.pdf"}:null);
   const [iaToast, setIaToast] = useState<string|null>(null);
   const onDepot = (r:DepotResult) => {
     const byKind:Record<string,number> = {facture:5,devis:5,pv:5,audit:1,avis:1,anah:6,autre:5};
@@ -1586,7 +1587,7 @@ function DocumentsTab() {
 
   return (
     <div style={{display:'flex',flexDirection:'column',height:'100%'}}>
-      {depot&&<DepotIA slot={depot.slot} phaseLabel={depot.phaseId!=null?phasesDocs.find(p=>p.id===depot.phaseId)?.label:undefined} onClose={()=>setDepot(null)} onValidate={onDepot}/>}
+      {depot&&<DepotIA slot={depot.slot} phaseLabel={depot.phaseId!=null?phasesDocs.find(p=>p.id===depot.phaseId)?.label:undefined} onClose={()=>setDepot(null)} onValidate={onDepot} autoFile={depot.auto}/>}
       {iaToast&&<div style={{position:"fixed",bottom:"96px",right:"24px",zIndex:1200,background:"#6A009C",color:"#FBFBFB",padding:"12px 16px",borderRadius:"4px",fontSize:"14px",display:"flex",alignItems:"center",gap:"8px",boxShadow:"0 1px 3px rgba(0,0,0,0.25)"}}><i className="ph-light ph-sparkle" style={{fontSize:"16px"}}/>{iaToast}</div>}
 
       {/* ── Sous-navigation Documents / Signatures ── */}

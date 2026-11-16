@@ -81,7 +81,7 @@ const SAMPLES: { label: string; file: string }[] = [
 ];
 const STEPS = ["Lecture du document", "Reconnaissance du type", "Extraction des champs", "Rapprochement avec le dossier"];
 
-export default function DepotIA({ slot, phaseLabel, onClose, onValidate }: { slot?: string; phaseLabel?: string; onClose: () => void; onValidate: (r: DepotResult) => void }) {
+export default function DepotIA({ slot, phaseLabel, onClose, onValidate, autoFile }: { slot?: string; phaseLabel?: string; onClose: () => void; onValidate: (r: DepotResult) => void; autoFile?: string }) {
   const [file, setFile] = useState<string | null>(null);
   const [step, setStep] = useState(-1);
   const [kind, setKind] = useState<DocKind>("autre");
@@ -95,6 +95,7 @@ export default function DepotIA({ slot, phaseLabel, onClose, onValidate }: { slo
     STEPS.forEach((_, i) => setTimeout(() => setStep(i + 1), 550 * (i + 1)));
     setTimeout(() => { setKind(k); setData(extract(k, `${slot || ""} ${fname}`)); }, 550 * STEPS.length + 100);
   };
+  React.useEffect(() => { if (autoFile) start(autoFile); }, []);
   const reKind = (k: DocKind) => { setKind(k); setData(extract(k, `${slot || ""} ${file || ""}`)); };
   const setField = (i: number, v: string) => data && setData({ ...data, fields: data.fields.map((f, j) => j === i ? { ...f, v } : f) });
   const done = !!data;

@@ -223,18 +223,24 @@ td{padding:1vh 1.4vh;border-bottom:1px solid var(--n300)}
 </section>
 
 <!-- 10 -->
-<section class="slide" data-notes="Montrer que le chemin d'une facture évite toute ressaisie : le SPEE ne saisit que ce qui relève de sa décision.">
+<section class="slide" data-demo="../?vue=amo&onglet=documents&depot=facture" data-notes="La capture à droite est la vraie fonctionnalité : l'entreprise dépose sa facture, Marius IA la lit, extrait les champs (entreprise, SIRET, poste, montants HT/TTC) et signale l'incohérence : solde facturé alors que la réception du lot n'est pas prononcée. Le CO valide, le reste se met à jour. Le SPEE ne saisit que ce qui relève de sa décision.">
   <div class="kicker">5 bis · Une facture, une seule saisie</div>
-  <h2>Le chemin d'une facture</h2>
-  <div class="flow" style="margin-top:2vh">
-    <div class="step">L'entreprise dépose la facture</div><i class="ph-light ph-arrow-right"></i>
-    <div class="step">Marius IA la lit et la rattache au lot</div><i class="ph-light ph-arrow-right"></i>
-    <div class="step">Le CO contrôle</div><i class="ph-light ph-arrow-right"></i>
-    <div class="step">Certificat de paiement et appel de fonds pré-remplis</div><i class="ph-light ph-arrow-right"></i>
-    <div class="step">Le SPEE paie dans son système</div><i class="ph-light ph-arrow-right"></i>
-    <div class="step" style="background:var(--p500);color:#fff">RECAP, trésorerie et reporting à jour</div>
+  <div class="split">
+    <div class="answers">
+      <h2>Le chemin d'une facture</h2>
+      <ol style="margin:0;padding-left:1.2em">
+        <li>L'entreprise dépose la facture</li>
+        <li><span class="tag ai"><i class="ph-light ph-sparkle"></i>Marius IA</span> la lit, extrait les données, la rattache au lot et contrôle sa cohérence</li>
+        <li>Le chargé d'opération vérifie et valide</li>
+        <li>Certificat de paiement et appel de fonds pré-remplis</li>
+        <li>Le SPEE paie dans son système</li>
+        <li><b>RECAP, trésorerie et reporting à jour</b></li>
+      </ol>
+      <p class="lead" style="max-width:100%;margin:0">La facture n'est saisie qu'une fois : les autres tableaux deviennent des vues de cette facture.</p>
+      <a class="btn" target="_blank" href="../?vue=amo&onglet=documents&depot=facture"><i class="ph-light ph-arrow-square-in"></i>Basculer sur la démo</a>
+    </div>
+    <div class="demo"><div class="frame"></div><div class="replaces">Dépôt d'une facture de solde : champs extraits par Marius IA (violet) et point d'attention (orange)</div></div>
   </div>
-  <p class="lead" style="margin-top:3vh">La facture n'est saisie qu'une fois. Les autres tableaux deviennent des vues de cette facture.</p>
 </section>
 
 <!-- 11 -->
