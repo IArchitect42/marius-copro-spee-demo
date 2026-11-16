@@ -7307,6 +7307,7 @@ function LaCoprTab() {
             <div style={{position:"absolute",bottom:0,left:0,right:0,padding:"24px 12px 12px",background:"linear-gradient(to top,rgba(0,0,0,0.65) 0%,transparent 100%)"}}>
               <div style={{fontSize:"10px",fontWeight:700,color:"rgba(255,255,255,0.6)"}}>Façade</div>
               <div style={{fontSize:"12px",fontWeight:600,color:"#FFFFFF"}}>24 rue Gambetta · Lille</div>
+              <div style={{fontSize:"10px",color:"rgba(255,255,255,0.55)",marginTop:"2px"}}>Photo Panoramax · Licence Ouverte (Etalab 2.0)</div>
             </div>
           </div>
 
@@ -7324,6 +7325,7 @@ function LaCoprTab() {
             <div style={{position:"absolute",bottom:0,left:0,right:0,padding:"24px 12px 12px",background:"linear-gradient(to top,rgba(0,0,0,0.65) 0%,transparent 100%)"}}>
               <div style={{fontSize:"10px",fontWeight:700,color:"rgba(255,255,255,0.6)"}}>Plan de situation</div>
               <div style={{fontSize:"12px",fontWeight:600,color:"#FFFFFF"}}>Quartier Gambetta · MEL</div>
+              <div style={{fontSize:"10px",color:"rgba(255,255,255,0.55)",marginTop:"2px"}}>Plan IGN · Géoplateforme</div>
             </div>
           </div>
 
@@ -7349,7 +7351,7 @@ function LaCoprTab() {
               {[
                 {label:"Lots",      val:`${fiche.nbLots} lots`,           icon:"ph-door"},
                 {label:"Tantièmes", val:"2 072 tantièmes",                   icon:"ph-scales"},
-                {label:"DPE",       val:`${fiche.dpe} → C`,                  icon:"ph-leaf"},
+                {label:"DPE",       val:`${(fiche as any).dpe ?? "E"} → C`,                  icon:"ph-leaf"},
                 {label:"Année",     val:`${fiche.anneeConstruction}`,         icon:"ph-calendar-blank"},
                 {label:"Surface",   val:`${fiche.surface} m²`,               icon:"ph-ruler"},
                 {label:"Programme", val:"Rénov'HdF",                         icon:"ph-flag"},
