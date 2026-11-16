@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { useFile } from "@dust/react-hooks";
 import SpeeView from "./SpeeReseau";
 import DepotIA, { DepotResult } from "./DepotIA";
+import AmoSyndics from "./AmoSyndics";
 import { LIGHT_LOCKED, LIGHT, LightBanner, LockedFeature, ParcoursQualiteLight } from "./LightAccess";
 import { CheckCircle2, Clock, AlertCircle, Send, FileText, Info, Banknote } from "lucide-react";
 
@@ -9315,7 +9316,7 @@ const TABS:{id:Tab;icon:string;label:string;on:boolean}[]=[
 
 const NAV=[
   {section:"Mon activité",cust:true,items:[
-    {icon:"ph-folder-simple-user",label:"Clients"},
+    {icon:"ph-address-book",label:"Syndics"},
     {icon:"ph-files",             label:"Demandes"},
     {icon:"ph-buildings",         label:"Mission Copro",active:true},
   ]},
@@ -15811,20 +15812,20 @@ export default function MariusCopro() {
               <ul style={{listStyle:"none",margin:0,padding:0}}>
                 {sec.items.map((item:any)=>(
                   <li key={item.label}>
-                    <a href="#" onClick={e=>{e.preventDefault();if(item.label==="Mission Copro"){setAmoPage("portfolio");setAmoSection("mission");}else if(item.label==="Clients"){setAmoSection("clients");setAmoPage("detail");}else if(item.label==="Demandes"){setAmoSection("demandes");setAmoPage("detail");}else if(item.label==="Collaborateurs"){setAmoSection("collaborateurs");setAmoPage("detail");}else if(item.label==="Calendrier"){setAmoSection("calendrier");setAmoPage("detail");} }} style={{
+                    <a href="#" onClick={e=>{e.preventDefault();if(item.label==="Mission Copro"){setAmoPage("portfolio");setAmoSection("mission");}else if(item.label==="Syndics"){setAmoSection("clients");setAmoPage("detail");}else if(item.label==="Demandes"){setAmoSection("demandes");setAmoPage("detail");}else if(item.label==="Collaborateurs"){setAmoSection("collaborateurs");setAmoPage("detail");}else if(item.label==="Calendrier"){setAmoSection("calendrier");setAmoPage("detail");} }} style={{
                       display:"flex",alignItems:"center",gap:"8px",
                       padding:"0 0 0 10px",height:"40px",borderRadius:"20px",
                       textDecoration:"none",fontSize:"16px",lineHeight:"24px",fontFamily:"Inter,sans-serif",
-                      color: item.active ? "#FBFBFB" : "#2A5161",
+                      color: ((({"Mission Copro":"mission","Syndics":"clients","Demandes":"demandes","Collaborateurs":"collaborateurs","Calendrier":"calendrier"} as any)[item.label])===amoSection) ? "#FBFBFB" : "#2A5161",
                       fontWeight: 400,
-                      background: item.active ? "#2E596B" : "transparent",
+                      background: ((({"Mission Copro":"mission","Syndics":"clients","Demandes":"demandes","Collaborateurs":"collaborateurs","Calendrier":"calendrier"} as any)[item.label])===amoSection) ? "#2E596B" : "transparent",
                       transition:"background 0.12s,color 0.12s",
                     }}
-                    onMouseEnter={e=>{if(!item.active){(e.currentTarget as HTMLElement).style.background="#FBFBFB";(e.currentTarget as HTMLElement).style.color="#13252D";}}}
-                    onMouseLeave={e=>{if(!item.active){(e.currentTarget as HTMLElement).style.background="transparent";(e.currentTarget as HTMLElement).style.color="#2A5161";}}}
+                    onMouseEnter={e=>{if(!((({"Mission Copro":"mission","Syndics":"clients","Demandes":"demandes","Collaborateurs":"collaborateurs","Calendrier":"calendrier"} as any)[item.label])===amoSection)){(e.currentTarget as HTMLElement).style.background="#FBFBFB";(e.currentTarget as HTMLElement).style.color="#13252D";}}}
+                    onMouseLeave={e=>{if(!((({"Mission Copro":"mission","Syndics":"clients","Demandes":"demandes","Collaborateurs":"collaborateurs","Calendrier":"calendrier"} as any)[item.label])===amoSection)){(e.currentTarget as HTMLElement).style.background="transparent";(e.currentTarget as HTMLElement).style.color="#2A5161";}}}
                     >
-                      <span style={{width:"8px",height:"8px",borderRadius:"50%",background:item.active?"#84BF40":"transparent",flexShrink:0}}/>
-                      <i className={`ph-light ${item.icon}`} style={{fontSize:"24px",flexShrink:0,color:item.active?"#FBFBFB":"#2A5161"}}/>
+                      <span style={{width:"8px",height:"8px",borderRadius:"50%",background:((({"Mission Copro":"mission","Syndics":"clients","Demandes":"demandes","Collaborateurs":"collaborateurs","Calendrier":"calendrier"} as any)[item.label])===amoSection)?"#84BF40":"transparent",flexShrink:0}}/>
+                      <i className={`ph-light ${item.icon}`} style={{fontSize:"24px",flexShrink:0,color:((({"Mission Copro":"mission","Syndics":"clients","Demandes":"demandes","Collaborateurs":"collaborateurs","Calendrier":"calendrier"} as any)[item.label])===amoSection)?"#FBFBFB":"#2A5161"}}/>
                       <span style={{flex:1,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{item.label}</span>
                       {item.badge&&<span style={{fontSize:"10px",background:"rgba(19,37,45,0.12)",color:C.secondary,borderRadius:"999px",padding:"2px 4px",flexShrink:0}}>{item.badge}</span>}
                       {item.beta&&<span style={{fontSize:"10px",background:"rgba(19,37,45,0.08)",color:"#587A89",borderRadius:"2px",padding:"2px 4px",flexShrink:0}}>[beta]</span>}
@@ -15968,132 +15969,8 @@ export default function MariusCopro() {
 
 
 
-        {/* ── AMO CLIENTS ── */}
-        {amoSection==="clients" && amoPage!=="portfolio" && (()=>{
-          const [clientFilter, setClientFilter] = React.useState<"tous"|"en_cours"|"sans_mission"|"archives">("en_cours");
-          const [clientSearch, setClientSearch] = React.useState("");
-          const AMO_CLIENTS=[
-            {id:"c1", nom:"La Résidence Vauban",      syndic:"Cabinet Lecomte",    commune:"Lille",            cp:"59000", lots:12, cat:"Copro fragile",   budget:"290 950 €", rfr:"14 200 €",  missions:"Mission Copro",      statut:"en_cours"},
-            {id:"c2", nom:"Les Terrasses Faidherbe",  syndic:"Syndic Nord Habitat",commune:"Lille",            cp:"59000", lots:18, cat:"Copro fragile",   budget:"350 000 €", rfr:"13 800 €",  missions:"Mission Copro",      statut:"en_cours"},
-            {id:"c3", nom:"Résidence du Parc Barbieux",syndic:"Immo Services",     commune:"Roubaix",          cp:"59100", lots:24, cat:"Standard",        budget:"520 000 €", rfr:"21 000 €",  missions:"Mission Copro",      statut:"en_cours"},
-            {id:"c4", nom:"Immeuble Carnot",          syndic:"Cabinet Dupont",     commune:"Lille",            cp:"59000", lots: 8, cat:"Très dégradée",   budget:"—",          rfr:"11 500 €",  missions:"1 Mission",          statut:"en_cours"},
-            {id:"c5", nom:"Cité Monier",              syndic:"Nord Gestion",       commune:"Lomme",            cp:"59160", lots:20, cat:"Copro fragile",   budget:"—",          rfr:"12 100 €",  missions:"Prise de contact",   statut:"sans_mission"},
-            {id:"c6", nom:"Résidence Clairfontaine",  syndic:"Cabinet Lecomte",    commune:"Marcq-en-Barœul",  cp:"59700", lots:16, cat:"Standard",        budget:"—",          rfr:"18 500 €",  missions:"Aucune",             statut:"sans_mission"},
-            {id:"c7", nom:"Square Victor Hugo",       syndic:"Syndic HDF",         commune:"Valenciennes",     cp:"59300", lots:10, cat:"Copro fragile",   budget:"—",          rfr:"13 200 €",  missions:"Aucune",             statut:"sans_mission"},
-            {id:"c8", nom:"Les Jardins de la Deûle",  syndic:"Immo Services",      commune:"Lille",            cp:"59000", lots:28, cat:"Standard",        budget:"—",          rfr:"23 400 €",  missions:"Aucune",             statut:"sans_mission"},
-            {id:"c9", nom:"Résidence d'Orient",       syndic:"Cabinet Armentières",commune:"Lille",            cp:"59000", lots:14, cat:"Copro fragile",   budget:"—",          rfr:"12 900 €",  missions:"Archivé",            statut:"archives"},
-            {id:"c10",nom:"Bellevue Saint-Maurice",   syndic:"Nord Gestion",       commune:"Roubaix",          cp:"59100", lots: 9, cat:"Très dégradée",   budget:"—",          rfr:"10 800 €",  missions:"Archivé",            statut:"archives"},
-          ];
-          const filtered = AMO_CLIENTS
-            .filter(c => clientFilter==="tous" || c.statut===clientFilter)
-            .filter(c => clientSearch==="" || c.nom.toLowerCase().includes(clientSearch.toLowerCase()) || c.commune.toLowerCase().includes(clientSearch.toLowerCase()) || c.syndic.toLowerCase().includes(clientSearch.toLowerCase()));
-          const CAT_STYLE:{[k:string]:{bg:string;c:string}}={
-            "Copro fragile":  {bg:"#F7EBB7",c:"#AC5700"},
-            "Très dégradée":  {bg:"#FBEAEA",c:"#D32F2F"},
-            "Standard":       {bg:"#EBF4EC",c:"#388E3C"},
-          };
-          return(
-            <div style={{flex:1,overflowY:"auto",background:"#FBFBFB",display:"flex",flexDirection:"column"}}>
-              {/* Header */}
-              <div style={{background:"#FFFFFF",borderBottom:"1px solid #EAEEF0",padding:"24px 32px"}}>
-                <div style={{display:"flex",alignItems:"flex-start",justifyContent:"space-between",marginBottom:"16px"}}>
-                  <h2 style={{margin:0,fontSize:"24px",fontWeight:700,color:C.primary,fontFamily:"Montserrat,sans-serif"}}>Mes Clients</h2>
-                  <button style={{fontFamily:"Montserrat,sans-serif",display:"flex",alignItems:"center",gap:"8px",background:C.secondary,color:"#FFFFFF",border:"none",cursor:"pointer",padding:"8px 16px",borderRadius:"8px",fontSize:"12px",fontWeight:700}}>
-                    <i className="ph-light ph-plus-circle" style={{fontSize:"14px"}}/>Nouveau client
-                  </button>
-                </div>
-                {/* Info banner */}
-                <div style={{background:"#E6F3FA",border:"1px solid #C9E0F0",borderRadius:"8px",padding:"12px 16px",marginBottom:"16px",display:"flex",alignItems:"flex-start",gap:"12px"}}>
-                  <i className="ph-light ph-info" style={{fontSize:"16px",color:"#2E596B",flexShrink:0,marginTop:"2px"}}/>
-                  <div style={{fontSize:"12px",color:"#2A5161",lineHeight:"1.6"}}>
-                    Dans cet espace, vous pouvez accéder à l'ensemble de vos <strong>copropriétés clientes</strong>.<br/>
-                    En sélectionnant une copropriété, vous pourrez consulter ses informations, ses documents, l'activité associée, créer des missions ou ajouter des notes.
-                  </div>
-                </div>
-                {/* Filters */}
-                <div style={{display:"flex",alignItems:"center",gap:"8px",marginBottom:"12px",flexWrap:"wrap"}}>
-                  {[
-                    {id:"tous",       label:"Toutes les copros"},
-                    {id:"en_cours",   label:"Missions en cours"},
-                    {id:"sans_mission",label:"Sans mission active"},
-                    {id:"archives",   label:"Archivées"},
-                  ].map(f=>{
-                    const active=clientFilter===f.id;
-                    return(<button key={f.id} onClick={()=>setClientFilter(f.id as any)} style={{fontFamily:"Montserrat,sans-serif",padding:"4px 12px",borderRadius:"999px",border:`1px solid ${active?C.secondary:"#EAEEF0"}`,background:active?C.secondary:"#FFFFFF",color:active?"#FFFFFF":"#587A89",fontSize:"12px",fontWeight:active?700:400,cursor:"pointer",transition:"all 0.15s"}}>{f.label}</button>);
-                  })}
-                </div>
-                {/* Search */}
-                <div style={{display:"flex",gap:"8px",alignItems:"center"}}>
-                  <div style={{flex:1,position:"relative"}}>
-                    <i className="ph-light ph-magnifying-glass" style={{position:"absolute",left:"11px",top:"50%",transform:"translateY(-50%)",fontSize:"14px",color:"#9FB3BB"}}/>
-                    <input value={clientSearch} onChange={e=>setClientSearch(e.target.value)}
-                      placeholder="Rechercher par nom, commune, syndic…"
-                      style={{width:"100%",border:"1.5px solid #EAEEF0",borderRadius:"8px",padding:"8px 12px 8px 32px",fontSize:"12px",fontFamily:"Inter,sans-serif",outline:"none",boxSizing:"border-box"}}/>
-                  </div>
-                  <button style={{fontFamily:"Montserrat,sans-serif",padding:"8px 16px",border:"1px solid #EAEEF0",borderRadius:"8px",background:"#FFFFFF",fontSize:"12px",fontWeight:600,color:C.primary,cursor:"pointer",display:"flex",alignItems:"center",gap:"4px"}}>
-                    <i className="ph-light ph-magnifying-glass" style={{fontSize:"14px"}}/>Rechercher
-                  </button>
-                </div>
-              </div>
-              {/* Table */}
-              <div style={{flex:1,padding:"24px 32px",overflowY:"auto"}}>
-                <div style={{background:"#FBFBFB",border:"1px solid #C3C5C7",borderRadius:"8px",overflow:"hidden"}}>
-                  <table style={{width:"100%",borderCollapse:"collapse",fontSize:"12px"}}>
-                    <thead>
-                      <tr style={{background:"#FBFBFB",borderBottom:"1px solid #EAEEF0"}}>
-                        {["Copropriété","Syndic","Commune","CP","Lots","Catégorie","Budget","RFR moy.","Mission(s)"].map((h,i)=>(
-                          <th key={h} style={{padding:"12px 12px",fontWeight:600,color:"#587A89",fontSize:"12px",textAlign:i>2?"center":"left",whiteSpace:"nowrap",cursor:"pointer",userSelect:"none"}}>
-                            {h} {i===0&&<i className="ph-light ph-arrows-down-up" style={{fontSize:"10px",opacity:0.5}}/>}
-                          </th>
-                        ))}
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {filtered.map((c,i)=>{
-                        const cs=CAT_STYLE[c.cat]||{bg:"#F2F3F4",c:"#587A89"};
-                        return(
-                          <tr key={c.id}
-                            onClick={c.id==="c1"?()=>{setAmoSection("mission");setAmoPage("detail");}:undefined}
-                            style={{borderBottom:i<filtered.length-1?"1px solid #FBFBFB":"none",cursor:c.id==="c1"?"pointer":"default",transition:"background 0.1s"}}
-                            onMouseEnter={e=>{(e.currentTarget as HTMLElement).style.background="#FBFBFB";}}
-                            onMouseLeave={e=>{(e.currentTarget as HTMLElement).style.background="transparent";}}>
-                            <td style={{padding:"12px 12px"}}>
-                              <div style={{fontWeight:700,color:C.primary,fontSize:"12px",display:"flex",alignItems:"center",gap:"8px"}}>
-                                {c.nom}
-                                {c.id==="c1"&&<span style={{background:C.secondary+"18",color:C.secondary,borderRadius:"4px",padding:"2px 4px",fontSize:"10px",fontWeight:700}}>Actif</span>}
-                              </div>
-                            </td>
-                            <td style={{padding:"12px 12px",color:"#587A89"}}>{c.syndic}</td>
-                            <td style={{padding:"12px 12px",color:"#2A5161"}}>{c.commune}</td>
-                            <td style={{padding:"12px 12px",textAlign:"center",color:"#587A89"}}>{c.cp}</td>
-                            <td style={{padding:"12px 12px",textAlign:"center",fontWeight:600,color:C.primary}}>{c.lots}</td>
-                            <td style={{padding:"12px 12px",textAlign:"center"}}>
-                              <span style={{background:cs.bg,color:cs.c,borderRadius:"999px",padding:"2px 8px",fontSize:"10px",fontWeight:700,whiteSpace:"nowrap"}}>{c.cat}</span>
-                            </td>
-                            <td style={{padding:"12px 12px",textAlign:"center",fontWeight:600,color:c.budget!=="—"?C.secondary:"#BECCD1"}}>{c.budget}</td>
-                            <td style={{padding:"12px 12px",textAlign:"center",color:"#587A89"}}>{c.rfr}</td>
-                            <td style={{padding:"12px 12px",textAlign:"center"}}>
-                              {c.statut==="en_cours"?(
-                                <span style={{background:"#F3F9EC",color:"#388E3C",borderRadius:"999px",padding:"2px 8px",fontSize:"10px",fontWeight:700}}>{c.missions}</span>
-                              ):c.statut==="archives"?(
-                                <span style={{background:"#F2F3F4",color:"#9FB3BB",borderRadius:"999px",padding:"2px 8px",fontSize:"10px",fontWeight:600}}>{c.missions}</span>
-                              ):(
-                                <span style={{color:"#BECCD1",fontSize:"10px"}}>—</span>
-                              )}
-                            </td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                  <div style={{padding:"12px 16px",borderTop:"1px solid #F2F3F4",background:"#FBFBFB"}}>
-                    <span style={{fontSize:"12px",color:"#9FB3BB"}}>Total : {filtered.length} copropriété{filtered.length>1?"s":""}</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          );
-        })()}
+        {/* ── AMO SYNDICS (remplace Clients) ── */}
+        {amoSection==="clients" && amoPage!=="portfolio" && <AmoSyndics onOpenDossier={()=>{setAmoSection("mission");setAmoPage("detail");setTab("lacopro");}}/>}
 
         {/* ── AMO DEMANDES ── */}
         {amoSection==="demandes" && amoPage!=="portfolio" && (
