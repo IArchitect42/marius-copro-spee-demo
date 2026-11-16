@@ -1,0 +1,15 @@
+/* Couche globale DS Marius (THE DAM) appliquée au proto : champs de formulaire et typo de base */
+body { font-family: Inter, sans-serif; color: #13252D; }
+h1, h2, h3, h4 { font-family: Montserrat, sans-serif; }
+input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=file]), select, textarea {
+  border: 1px solid #D6D9DB !important; border-radius: 4px !important; font-family: Inter, sans-serif !important;
+  font-size: 14px !important; color: #13252D !important; background-color: #FFFFFF; box-sizing: border-box;
+}
+input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=file]), textarea { box-shadow: inset 0 1px 3px rgba(0,0,0,0.25) !important; }
+input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=file]), select { min-height: 32px; }
+select { box-shadow: none !important; cursor: pointer; }
+textarea { min-height: 96px; line-height: 20px !important; }
+input:focus, select:focus, textarea:focus { outline: none; border-color: #2E596B !important; }
+input:disabled, select:disabled, textarea:disabled { background: #E4E6E7 !important; color: #767778 !important; box-shadow: none !important; }
+input::placeholder, textarea::placeholder { color: #989A9B; }
+input[type=checkbox], input[type=radio] { accent-color: #2E596B; }
