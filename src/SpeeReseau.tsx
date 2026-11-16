@@ -4,6 +4,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import CreerCopro from "./CreerCopro";
 import { DEMANDES_INIT, DemandesListe, DemandeFiche, Demande } from "./DemandeFiche";
+import FicheLot, { LotData } from "./FicheLot";
 import { T, F, txt, fmtE, Icon, Button, Tag, BlockWrapper, KeyValue, AlertBlock, Segmented, TabMenu, Input, Select, Checkbox, th, td, Progress, MenuEntry, downloadCSV, TagStatus } from "./ds";
 
 type Page = "nouvelle" | "portefeuille" | "recap" | "qualification" | "financement" | "tresorerie" | "operateurs" | "reporting" | "coconstruction";
@@ -283,7 +284,22 @@ const LOTS_V = [
 const TT = LOTS_V.reduce((a, l) => a + l.t, 0);
 const RAC_COLL = 101808;
 type LotFin = { finance: boolean; manuel: string; pieces: number; analyse: string };
+// Données détaillées par lot (base projet du SPEE) : défauts + 4 lots illustratifs (PO TMO, PO au-dessus du seuil, PB, SCI)
+function lotData(l: { id: number; t: number; nom: string; cat: string }): LotData {
+  const base: LotData = { id: l.id, nom: l.nom, cat: l.cat, tGen: l.t, tLog: Math.round(l.t / 2.072), type: l.t > 190 ? "T4" : l.t > 170 ? "T3" : "T2", bat: l.id <= 6 ? "A" : "B", entree: l.id <= 6 ? "1" : "2", etage: `étage ${((l.id - 1) % 6) >> 1}`, surface: Math.round(l.t / 2.6),
+    statut: "PO", occupants: 2, composition: "couple", age: "De 40 à 50 ans", situation: "Employés", tel: "06 •• •• •• " + String(10 + l.id), mail: `lot${l.id}@example.fr`,
+    privatifs: [], financement: "Éco-PTZ", revenus: { salaires: 3100, primes: 0, allocations: 0, pensions: 0, autres: 0 }, charges: { logement: 0, assurances: 140, energie3m: 420, copro3m: 690, eau: 35, telecom: 45 },
+    credits: 0, impots: 1800, rfr: 33000, valeurBien: 145000, crd: 0, ecoEnergie: 40 };
+  const o: Record<number, Partial<LotData>> = {
+    1: { type: "T3", occupants: 1, composition: "personne seule", age: "Plus de 70 ans", situation: "Retraités", revenus: { salaires: 0, primes: 0, allocations: 0, pensions: 1180, autres: 0 }, impots: 0, rfr: 14100, charges: { logement: 0, assurances: 95, energie3m: 390, copro3m: 640, eau: 25, telecom: 30 }, valeurBien: 132000 },
+    3: { type: "T4", occupants: 4, composition: "couple, 2 enfants", age: "De 40 à 50 ans", situation: "Cadres et professions intellectuelles supérieures", privatifs: [{ poste: "Menuiseries double vitrage (6 fenêtres)", ttc: 9400 }, { poste: "Isolation intérieure d'une chambre sur pignon", ttc: 3900 }, { poste: "Robinets thermostatiques et équilibrage", ttc: 1900 }], revenus: { salaires: 6300, primes: 250, allocations: 140, pensions: 0, autres: 0 }, credits: 1250, impots: 4800, rfr: 62000, valeurBien: 210000, crd: 95000, ecoEnergie: 45, charges: { logement: 0, assurances: 210, energie3m: 610, copro3m: 820, eau: 60, telecom: 70 } },
+    4: { statut: "PB", situation: "Professions intermédiaires", pb: { loyerHC: 520, charges: 90, loue: true }, occupants: 2, revenus: { salaires: 2600, primes: 0, allocations: 0, pensions: 0, autres: 520 } },
+    11: { statut: "SCI", sci: { raison: "SCI Dewulf Patrimoine", gerant: "M. Dewulf", siren: "812 004 377" }, pb: { loyerHC: 480, charges: 80, loue: false }, privatifs: [{ poste: "Menuiseries double vitrage", ttc: 9800 }, { poste: "Radiateurs électriques performants", ttc: 4200 }, { poste: "Isolation intérieure séjour", ttc: 2500 }], revenus: { salaires: 0, primes: 0, allocations: 0, pensions: 0, autres: 4100 }, credits: 900, rfr: 51000, valeurBien: 118000, crd: 40000, ecoEnergie: 0 },
+  };
+  return { ...base, ...(o[l.id] || {}) };
+}
 export function Financement() {
+  const [openLot, setOpenLot] = useState<number | null>(() => { const v = new URLSearchParams(window.location.search).get("lot"); return v ? Number(v) : null; });
   const [regle, setRegle] = useState({ tmo: 3000, mo: 1500, plafond: 30 });
   const [fin, setFin] = useState<Record<number, LotFin>>(() => Object.fromEntries(LOTS_V.map(l => [l.id, { finance: ["TMO", "MO", "INT"].includes(l.cat), manuel: "", pieces: l.cat === "?" ? 1 : l.id % 3 === 0 ? 4 : 6, analyse: l.id % 4 === 0 ? "Complément demandé" : l.cat === "?" ? "En attente de pièces" : "Favorable" }])));
   const upd = (id: number, p: Partial<LotFin>) => setFin(f => ({ ...f, [id]: { ...f[id], ...p } }));
@@ -299,6 +315,7 @@ export function Financement() {
   const catTag = (c: string) => c === "?" ? <Tag label="Inconnu" status="Disabled" /> : <span style={{ background: (T as any)[c], borderRadius: 12, padding: "0 8px", fontSize: 10, lineHeight: "16px", fontWeight: 500, display: "inline-block" }}>{c}</span>;
   const exp = () => downloadCSV("financement-vauban.csv", [["Lot", "Copropriétaire", "Tantièmes", "Catégorie", "Quote-part RAC", "Aide locale (pré-calcul)", "RAC éligible éco-PTZ", "Éco-PTZ retenu", "Apport", "Pièces reçues", "Analyse CO"],
     ...rows.map(r => [r.l.id, r.l.nom, r.l.t, r.l.cat, Math.round(r.qp), Math.round(r.locale), Math.round(r.ragElig), Math.round(r.ptz), Math.round(r.apport), `${r.f.pieces}/6`, r.f.analyse])]);
+  if (openLot != null) { const r = rows.find(x => x.l.id === openLot)!; return <FicheLot lot={lotData(r.l)} qpColl={Math.round(r.qp)} aideIndiv={r.l.cat === "TMO" ? 3000 : r.l.cat === "MO" ? 1500 : 0} aideLocale={Math.round(r.locale)} onBack={() => setOpenLot(null)} onDecision={a => upd(r.l.id, { analyse: a })} />; }
   return (<>
     <PageTitle title="Financement par copropriétaire" sub="La Résidence Vauban · 12 lots · reste à charge collectif après aides : 101 808 €"
       demande="Calculs automatiques (éco-PTZ : reste à charge éligible, case à cocher si la quote-part est financée, saisie manuelle si le montant diffère) ; aides locales intégrées au calcul ; suivi de la réception des pièces et du résultat de l'analyse du chargé d'opération." />
@@ -319,7 +336,7 @@ export function Financement() {
         <thead><tr>{["Lot", "Quote-part", "Aide locale", "RAC éligible", "Financer ?", "Éco-PTZ", "Apport", "Pièces", "Analyse CO"].map(h => <th key={h} style={th}>{h}</th>)}</tr></thead>
         <tbody>{rows.map(r => (
           <tr key={r.l.id}>
-            <td style={td}><div style={{ fontWeight: 700 }}>Lot {r.l.id} · {r.l.nom}</div><div style={{ display: "flex", gap: 6, alignItems: "center", marginTop: 4 }}>{catTag(r.l.cat)}<span style={txt.bodyXS}>{r.l.t} tantièmes</span></div></td>
+            <td style={{ ...td, cursor: "pointer" }} onClick={() => setOpenLot(r.l.id)}><div style={{ fontWeight: 700, color: T.p500, textDecoration: "underline" }}>Lot {r.l.id} · {r.l.id === 11 ? "SCI Dewulf Patrimoine" : r.l.nom}</div><div style={{ display: "flex", gap: 6, alignItems: "center", marginTop: 4 }}>{catTag(r.l.cat)}<span style={txt.bodyXS}>{r.l.t} tantièmes</span></div></td>
             <td style={{ ...td, whiteSpace: "nowrap" }}>{fmtE(r.qp)}</td>
             <td style={{ ...td, whiteSpace: "nowrap" }}>{r.locale ? fmtE(r.locale) : "—"}</td>
             <td style={{ ...td, whiteSpace: "nowrap" }}>{fmtE(r.ragElig)}</td>
