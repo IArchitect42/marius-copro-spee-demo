@@ -1,2 +1,3 @@
 import MariusCopro from "./MariusCopro";
-export default function App() { return <MariusCopro />; }
+import MariusIA from "./MariusIA";
+export default function App() { return (<><MariusCopro /><MariusIA /></>); }
