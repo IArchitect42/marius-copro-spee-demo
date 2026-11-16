@@ -2,6 +2,7 @@ import React from "react";
 import { useState, useEffect } from "react";
 import { useFile } from "@dust/react-hooks";
 import SpeeView from "./SpeeReseau";
+import DepotIA, { DepotResult } from "./DepotIA";
 import { CheckCircle2, Clock, AlertCircle, Send, FileText, Info, Banknote } from "lucide-react";
 
 // ─── COULEURS MARIUS EXACTES (depuis bootstrapmarius.min.css) ───
@@ -1541,6 +1542,21 @@ const PHASES_DOCS: PhaseDoc[] = [
 
 function DocumentsTab() {
   const [docSubTab, setDocSubTab] = useState<'documents'|'signatures'>('documents');
+  const [phasesDocs, setPhasesDocs] = useState<PhaseDoc[]>(PHASES_DOCS);
+  const [depot, setDepot] = useState<{slot?:string;phaseId?:number}|null>(null);
+  const [iaToast, setIaToast] = useState<string|null>(null);
+  const onDepot = (r:DepotResult) => {
+    const byKind:Record<string,number> = {facture:5,devis:5,pv:5,audit:1,avis:1,anah:6,autre:5};
+    const pid = depot?.phaseId ?? byKind[r.kind] ?? 5;
+    const today = new Date().toLocaleDateString("fr-FR");
+    setPhasesDocs(ps=>ps.map(p=>p.id!==pid?p:{...p,
+      docs:[...p.docs,{name:r.name,type:r.type,date:today,by:r.by,...(r.montant?{montant:r.montant}:{}),ia:true} as any],
+      expectedDocs: depot?.slot ? p.expectedDocs.filter(x=>x!==depot.slot) : p.expectedDocs}));
+    setOpenPhases(o=>o.includes(pid)?o:[...o,pid]);
+    setDepot(null);
+    setIaToast(`${r.fields.length} champs transcrits par Marius IA dans ${r.dest}`);
+    setTimeout(()=>setIaToast(null),4000);
+  };
   const [openPhases, setOpenPhases] = useState<number[]>([0,1]);
   const [preview,    setPreview]    = useState<Doc|null>(null);
   const [toast,      setToast]      = useState<string|null>(null);
@@ -1563,10 +1579,12 @@ function DocumentsTab() {
                                s==="en cours"?{bg:"#F3F9EC",c:"#AC5700",l:"En cours"}:
                                               {bg:"#F2F3F4",c:"#587A89",l:"À venir"};
 
-  const totalDocs = PHASES_DOCS.reduce((a,p)=>a+p.docs.length,0);
+  const totalDocs = phasesDocs.reduce((a,p)=>a+p.docs.length,0);
 
   return (
     <div style={{display:'flex',flexDirection:'column',height:'100%'}}>
+      {depot&&<DepotIA slot={depot.slot} phaseLabel={depot.phaseId!=null?phasesDocs.find(p=>p.id===depot.phaseId)?.label:undefined} onClose={()=>setDepot(null)} onValidate={onDepot}/>}
+      {iaToast&&<div style={{position:"fixed",bottom:"96px",right:"24px",zIndex:1200,background:"#6A009C",color:"#FBFBFB",padding:"12px 16px",borderRadius:"4px",fontSize:"14px",display:"flex",alignItems:"center",gap:"8px",boxShadow:"0 1px 3px rgba(0,0,0,0.25)"}}><i className="ph-light ph-sparkle" style={{fontSize:"16px"}}/>{iaToast}</div>}
 
       {/* ── Sous-navigation Documents / Signatures ── */}
       <div style={{background:'#FFFFFF',borderBottom:'1px solid #EAEEF0',padding:'0 28px',display:'flex',gap:0,flexShrink:0}}>
@@ -1654,16 +1672,16 @@ function DocumentsTab() {
       <div style={{display:"flex",alignItems:"flex-start",justifyContent:"space-between",marginBottom:"24px"}}>
         <div>
           <h4 style={{margin:"0 0 4px",fontWeight:700,color:C.primary,fontSize:"20px",fontFamily:"Montserrat,sans-serif"}}>Documents</h4>
-          <p style={{margin:0,color:"#587A89",fontSize:"14px"}}>{totalDocs} documents déposés · {PHASES_DOCS.filter(p=>p.status==="terminée").length} phases terminées sur {PHASES_DOCS.length}</p>
+          <p style={{margin:0,color:"#587A89",fontSize:"14px"}}>{totalDocs} documents déposés · {phasesDocs.filter(p=>p.status==="terminée").length} phases terminées sur {phasesDocs.length}</p>
         </div>
-        <button style={{fontFamily:"Montserrat,sans-serif",display:"flex",alignItems:"center",gap:"8px",background:"#FFFFFF",border:`1px solid ${C.secondary}`,borderRadius:"4px",padding:"8px 16px",fontSize:"14px",fontWeight:600,color:C.secondary,cursor:"pointer"}}>
+        <button onClick={()=>setDepot({})} style={{fontFamily:"Montserrat,sans-serif",display:"flex",alignItems:"center",gap:"8px",background:"#FFFFFF",border:`1px solid ${C.secondary}`,borderRadius:"4px",padding:"8px 16px",fontSize:"14px",fontWeight:600,color:C.secondary,cursor:"pointer"}}>
           <i className="ph-light ph-upload-simple" style={{fontSize:"16px"}}/>Déposer un document
         </button>
       </div>
 
       {/* Phases */}
       <div style={{display:"flex",flexDirection:"column",gap:"12px"}}>
-        {PHASES_DOCS.map(phase=>{
+        {phasesDocs.map(phase=>{
           const open = openPhases.includes(phase.id);
           const s    = ss(phase.status);
           return (
@@ -1719,6 +1737,7 @@ function DocumentsTab() {
                                   <div style={{display:"flex",alignItems:"center",gap:"8px"}}>
                                     <i className="ph-light ph-file-pdf" style={{fontSize:"20px",color:"#D32F2F",flexShrink:0}}/>
                                     <span style={{fontWeight:500,color:C.primary}}>{doc.name}</span>
+                                    {(doc as any).ia&&<span style={{display:"inline-flex",alignItems:"center",gap:"4px",height:"16px",padding:"0 8px",borderRadius:"12px",background:"#F7E6FF",color:"#6A009C",fontSize:"10px",fontWeight:500,whiteSpace:"nowrap"}}><i className="ph-light ph-sparkle" style={{fontSize:"12px"}}/>Lu par Marius IA</span>}
                                   </div>
                                 </td>
                                 <td style={{padding:"12px 16px"}}>
@@ -1809,7 +1828,7 @@ function DocumentsTab() {
                                 <td style={{padding:"12px 16px",color:"#BECCD1",fontSize:"12px"}}>—</td>
                                 <td style={{padding:"12px 16px",color:"#BECCD1",fontSize:"12px"}}>—</td>
                                 <td style={{padding:"12px 16px",textAlign:"right"}}>
-                                  <button
+                                  <button onClick={()=>setDepot({slot:slotName,phaseId:phase.id})}
                                     title="Déposer ce document"
                                     style={{fontFamily:"Montserrat,sans-serif",display:"inline-flex",alignItems:"center",gap:"4px",fontSize:"12px",fontWeight:600,color:"#587A89",background:"#F2F3F4",border:"1px dashed #BECCD1",borderRadius:"4px",padding:"4px 12px",cursor:"pointer",transition:"all 0.15s"}}
                                     onMouseEnter={e=>{(e.currentTarget as HTMLElement).style.background="#E6F3FA";(e.currentTarget as HTMLElement).style.color=C.secondary;(e.currentTarget as HTMLElement).style.borderColor=C.secondary;}}

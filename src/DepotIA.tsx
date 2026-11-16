@@ -1,0 +1,167 @@
+// Dépôt d'un document avec Marius IA (onglet Documents) : dépôt, lecture, champs extraits à vérifier, transcription.
+// Lecture SIMULÉE pour la démo. Champs devis/facture alignés sur la base TDCM.
+import React, { useRef, useState } from "react";
+import { T, F, txt, Icon, Button, Tag, AlertBlock, Input, Select } from "./ds";
+
+export type DocKind = "facture" | "devis" | "pv" | "audit" | "avis" | "anah" | "autre";
+type Fld = { k: string; v: string; warn?: string };
+export type DepotResult = { name: string; type: string; by: string; montant?: string; kind: DocKind; fields: Fld[]; dest: string };
+
+const KIND_LABEL: Record<DocKind, string> = { facture: "Facture artisan", devis: "Devis artisan", pv: "PV de réception", audit: "Audit énergétique", avis: "Avis d'imposition", anah: "Courrier ANAH", autre: "Autre document" };
+const KIND_TYPE: Record<DocKind, string> = { facture: "Facture", devis: "Devis", pv: "PV", audit: "Audit", avis: "Justificatif", anah: "Décision", autre: "Administratif" };
+
+export function guessKind(s: string): DocKind {
+  const n = s.toLowerCase();
+  if (n.includes("facture") || n.includes("situation")) return "facture";
+  if (n.includes("devis")) return "devis";
+  if (n.includes("pv") || n.includes("réception") || n.includes("reception")) return "pv";
+  if (n.includes("audit") || n.includes("dpe")) return "audit";
+  if (n.includes("avis") || n.includes("impo")) return "avis";
+  if (n.includes("anah") || n.includes("solde")) return "anah";
+  return "autre";
+}
+
+function extract(kind: DocKind, hint: string): { fields: Fld[]; by: string; montant?: string; name: string; dest: string; resume: string } {
+  const h = hint.toLowerCase();
+  const ent = h.includes("energo") || h.includes("énergo") ? { n: "ÉNERGO+", siret: "524 778 901 00033", mail: "chantiers@energoplus.fr", poste: "Pompe à chaleur air/eau collective", lot: "PAC air/eau" }
+    : h.includes("ventil") ? { n: "VENTIL PRO", siret: "903 112 457 00014", mail: "contact@ventilpro.fr", poste: "VMC double flux collective", lot: "VMC double flux" }
+    : h.includes("réseaux") || h.includes("reseaux") || h.includes("calori") ? { n: "RÉSEAUX THERM", siret: "781 004 552 00027", mail: "devis@reseauxtherm.fr", poste: "Calorifugeage des réseaux", lot: "Calorifugeage" }
+    : { n: "THERMIS BTP", siret: "812 345 678 00021", mail: "contact@thermis-btp.fr", poste: "Isolation thermique par l'extérieur", lot: "ITE façades" };
+  const proj = "24 rue Gambetta, 59000 Lille";
+  switch (kind) {
+    case "facture": return { by: ent.n, montant: "28 740 € TTC", name: `Facture solde ${ent.n} — 28 740 € TTC`, dest: `Suivi financier › lot ${ent.lot}`,
+      resume: `Facture rapprochée du marché ${ent.n} (lot ${ent.lot}). Le certificat de paiement et l'appel de fonds peuvent être pré-remplis.`,
+      fields: [
+        { k: "Syndicat / maître d'ouvrage", v: "SDC Résidence Vauban" }, { k: "Adresse du projet", v: proj },
+        { k: "Entreprise (raison sociale)", v: ent.n }, { k: "SIRET", v: ent.siret }, { k: "E-mail entreprise", v: ent.mail },
+        { k: "Poste 1 · intitulé", v: ent.poste }, { k: "Poste 1 · description", v: "Solde du marché, après réception" },
+        { k: "Montant HT", v: "27 241,71 €" }, { k: "Montant TTC", v: "28 740,00 €" },
+        { k: "Cumul facturé / marché", v: "100 % (91 785 € TTC + avenant)", warn: "Réception du lot pas encore prononcée : PV de réception attendu avant paiement du solde" },
+      ] };
+    case "devis": return { by: ent.n, montant: "33 760 € TTC", name: `Devis ${ent.n} — ${ent.poste}`, dest: "Analyse des offres",
+      resume: `Devis conforme au programme voté (poste ${ent.lot}). Qualification RGE valide.`,
+      fields: [
+        { k: "Ménage / maître d'ouvrage", v: "SDC Résidence Vauban" }, { k: "Adresse du projet", v: proj },
+        { k: "Entreprise (raison sociale)", v: ent.n }, { k: "SIRET", v: ent.siret }, { k: "E-mail entreprise", v: ent.mail },
+        { k: "Poste 1 · intitulé", v: ent.poste }, { k: "Poste 1 · description", v: "Fourniture et pose, 12 logements" },
+        { k: "Montant HT", v: "32 000,00 €" }, { k: "Montant TTC", v: "33 760,00 €" },
+        { k: "Qualification RGE", v: "Valide jusqu'au 31/03/2027" },
+      ] };
+    case "pv": return { by: "AMO Copro", name: `PV de réception — ${ent.lot} (${ent.n})`, dest: "Mission › Réception des travaux",
+      resume: "Réception prononcée avec réserves : les réserves sont créées comme tâches de suivi pour l'entreprise.",
+      fields: [
+        { k: "Lot", v: ent.lot }, { k: "Entreprise", v: ent.n }, { k: "Date de réception", v: "12/06/2026" },
+        { k: "Décision", v: "Réception avec réserves" }, { k: "Nombre de réserves", v: "3", warn: "3 réserves à lever sous 30 jours" },
+        { k: "Signataires", v: "Président CS, syndic, MOE, entreprise" },
+      ] };
+    case "audit": return { by: "Nord Énergie Conseil", name: "Audit énergétique — mise à jour", dest: "Projet › état initial et scénarios",
+      resume: "Données transcrites dans l'onglet Projet. Gain supérieur à 35 % : éligible à MaPrimeRénov' Copropriété.",
+      fields: [
+        { k: "Étiquette avant travaux", v: "E · 245 kWhEP/m².an" }, { k: "Étiquette après scénario retenu", v: "C · 118 kWhEP/m².an" },
+        { k: "Gain énergétique", v: "− 52 %" }, { k: "Émissions GES", v: "52 → 14 kgCO₂/m².an" }, { k: "Bureau d'études", v: "Nord Énergie Conseil" },
+      ] };
+    case "avis": return { by: "Copropriétaire", name: "Avis d'imposition — lot 6 (Mme Duquesnoy)", dest: "La Copro › enquête sociale, lot 6",
+      resume: "Catégorie de ressources déterminée : l'enquête sociale et le plan de financement individuel du lot 6 sont mis à jour.",
+      fields: [
+        { k: "Lot", v: "6 · Mme Duquesnoy" }, { k: "Revenu fiscal de référence", v: "17 920 €" }, { k: "Nombre de parts", v: "1" },
+        { k: "Année des revenus", v: "2025" }, { k: "Catégorie de ressources", v: "Très modeste (TMO)", warn: "Catégorie auparavant « inconnue » : prime individuelle de 3 000 € à ajouter" },
+      ] };
+    case "anah": return { by: "ANAH", montant: "48 080 €", name: "Notification de versement du solde ANAH", dest: "Financement › aides collectives",
+      resume: "Le solde ANAH est rapproché de la notification d'octroi (160 267 €). La trésorerie du projet est mise à jour.",
+      fields: [{ k: "Aide", v: "MaPrimeRénov' Copropriété" }, { k: "Montant versé", v: "48 080 €" }, { k: "Cumul versé / octroyé", v: "160 267 € / 160 267 €" }, { k: "Date de versement", v: "15/07/2026" }] };
+    default: return { by: "AMO Copro", name: hint || "Document", dest: "Documents", resume: "Type non reconnu avec certitude : choisissez le type pour lancer l'extraction adaptée.", fields: [{ k: "Titre détecté", v: hint || "—" }] };
+  }
+}
+
+const SAMPLES: { label: string; file: string }[] = [
+  { label: "Facture de solde THERMIS BTP", file: "facture-solde-thermis.pdf" },
+  { label: "PV de réception ITE", file: "pv-reception-ite.pdf" },
+  { label: "Devis VENTIL PRO", file: "devis-ventil-pro.pdf" },
+  { label: "Avis d'imposition lot 6", file: "avis-imposition-lot6.pdf" },
+];
+const STEPS = ["Lecture du document", "Reconnaissance du type", "Extraction des champs", "Rapprochement avec le dossier"];
+
+export default function DepotIA({ slot, phaseLabel, onClose, onValidate }: { slot?: string; phaseLabel?: string; onClose: () => void; onValidate: (r: DepotResult) => void }) {
+  const [file, setFile] = useState<string | null>(null);
+  const [step, setStep] = useState(-1);
+  const [kind, setKind] = useState<DocKind>("autre");
+  const [data, setData] = useState<ReturnType<typeof extract> | null>(null);
+  const [drag, setDrag] = useState(false);
+  const ref = useRef<HTMLInputElement>(null);
+
+  const start = (fname: string) => {
+    setFile(fname); setStep(0);
+    const k = guessKind(fname) !== "autre" ? guessKind(fname) : guessKind(slot || "");
+    STEPS.forEach((_, i) => setTimeout(() => setStep(i + 1), 550 * (i + 1)));
+    setTimeout(() => { setKind(k); setData(extract(k, `${slot || ""} ${fname}`)); }, 550 * STEPS.length + 100);
+  };
+  const reKind = (k: DocKind) => { setKind(k); setData(extract(k, `${slot || ""} ${file || ""}`)); };
+  const setField = (i: number, v: string) => data && setData({ ...data, fields: data.fields.map((f, j) => j === i ? { ...f, v } : f) });
+  const done = !!data;
+
+  return (
+    <div onClick={onClose} style={{ position: "fixed", inset: 0, background: "rgba(19,37,45,0.55)", zIndex: 1100, display: "flex", justifyContent: "center", alignItems: "flex-start", overflowY: "auto", padding: "40px 16px" }}>
+      <div onClick={e => e.stopPropagation()} style={{ width: 800, maxWidth: "100%", background: T.white, borderRadius: 8, boxShadow: "0 1px 3px rgba(0,0,0,0.25)", display: "flex", flexDirection: "column" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "16px 16px 0 24px" }}>
+          <div style={{ flex: 1 }}>
+            <div style={{ ...txt.h4 }}>Déposer un document</div>
+            <div style={{ ...txt.bodyS, color: T.n800, marginTop: 4 }}>{slot ? `${slot}${phaseLabel ? " · " + phaseLabel : ""}` : "Marius IA reconnaît le type et range le document dans la bonne phase"}</div>
+          </div>
+          <Tag label="Marius IA" status="AI" size="Medium" icon="sparkle" />
+          <Button size="Small" aspect="Neutral" icon="x" title="Fermer" onClick={onClose} />
+        </div>
+
+        <div style={{ padding: 24, display: "flex", flexDirection: "column", gap: 16 }}>
+          {step < 0 && (<>
+            <div onDragOver={e => { e.preventDefault(); setDrag(true); }} onDragLeave={() => setDrag(false)} onDrop={e => { e.preventDefault(); setDrag(false); const f = e.dataTransfer.files?.[0]; f && start(f.name); }}
+              style={{ background: drag ? T.b50 : T.p50, border: `1px dashed ${T.p500}`, borderRadius: 8, padding: "32px 16px", display: "flex", flexDirection: "column", alignItems: "center", gap: 12, textAlign: "center" }}>
+              <Icon n="upload-simple" size={32} color={T.p500} />
+              <div style={{ ...txt.bodyM, fontWeight: 700 }}>Glissez votre document ici</div>
+              <div style={{ ...txt.bodyS, color: T.n800 }}>PDF, image ou scan · Marius IA en extrait les données utiles au dossier</div>
+              <input ref={ref} type="file" accept=".pdf,.png,.jpg,.jpeg" style={{ display: "none" }} onChange={e => { const f = e.target.files?.[0]; f && start(f.name); e.target.value = ""; }} />
+              <Button size="Small" aspect="Outline" icon="paperclip" label="Choisir un fichier" onClick={() => ref.current?.click()} />
+            </div>
+            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+              <span style={{ ...txt.bodyS, color: T.n800 }}>Pas de fichier sous la main ? Utilisez un exemple :</span>
+              <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>{SAMPLES.map(s => <Button key={s.file} size="Tiny" aspect="Outline" icon="file-pdf" label={s.label} onClick={() => start(s.file)} />)}</div>
+            </div>
+          </>)}
+
+          {step >= 0 && (
+            <div style={{ display: "flex", alignItems: "center", gap: 12, background: T.n100, borderRadius: 8, padding: "12px 16px" }}>
+              <Icon n="file-pdf" size={32} color={T.r500} />
+              <div style={{ flex: 1 }}><div style={txt.bodySB}>{file}</div><div style={{ ...txt.bodyXS, marginTop: 4 }}>Déposé à l'instant</div></div>
+              {done && <Select value={kind} onChange={v => reKind(v as DocKind)} width={220} options={(Object.keys(KIND_LABEL) as DocKind[]).map(k => ({ v: k, label: KIND_LABEL[k] }))} />}
+            </div>
+          )}
+
+          {step >= 0 && !done && (
+            <div style={{ display: "flex", flexDirection: "column", gap: 8, padding: "0 4px" }}>
+              {STEPS.map((s, i) => (
+                <div key={s} style={{ display: "flex", alignItems: "center", gap: 8, ...txt.bodyS, color: step > i ? T.g500 : step === i ? T.ai500 : T.n700 }}>
+                  <Icon n={step > i ? "check-circle" : step === i ? "sparkle" : "circle-dashed"} size={16} color={step > i ? T.g500 : step === i ? T.ai500 : T.n700} />{s}{step === i && "…"}
+                </div>))}
+            </div>
+          )}
+
+          {done && data && (<>
+            <AlertBlock type="AI" title={`${KIND_LABEL[kind]} reconnu · ${data.fields.length} champs extraits`}>
+              {data.resume} Vérifiez les valeurs avant de valider : elles seront transcrites dans <b>{data.dest}</b>.
+            </AlertBlock>
+            <div style={{ background: T.n200, borderRadius: 8, padding: 16, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+              {data.fields.map((f, i) => (
+                <div key={f.k} style={{ gridColumn: f.warn ? "1 / -1" : undefined }}>
+                  <Input label={f.k} value={f.v} onChange={v => setField(i, v)} status={f.warn ? "Warning" : "AI"} subtext={f.warn || "Extrait par Marius IA"} />
+                </div>))}
+            </div>
+          </>)}
+        </div>
+
+        <div style={{ borderTop: `1px solid ${T.n500}`, padding: "16px 24px", display: "flex", justifyContent: "flex-end", gap: 8 }}>
+          <Button size="Small" aspect="Outline" label="Annuler" onClick={onClose} />
+          {done && data && <Button size="Small" aspect="Plain" icon="sparkle" label="Valider et transcrire" onClick={() => onValidate({ name: data.name, type: KIND_TYPE[kind], by: data.by, montant: data.montant, kind, fields: data.fields, dest: data.dest })} />}
+        </div>
+      </div>
+    </div>
+  );
+}
