@@ -118,7 +118,7 @@ td{padding:1vh 1.4vh;border-bottom:1px solid var(--n300)}
 </section>
 
 <!-- 4 -->
-<section class="slide" data-notes="La donnée est saisie une fois, puis affichée sous plusieurs vues. Ligne de partage : Marius structure, coordonne, trace et consolide ; le SPEE décide, contrôle, comptabilise et paie.">
+<section class="slide" data-notes="Insister sur la dernière ligne : aujourd'hui les pièces vivent dans OneDrive ou SharePoint, sans lien avec les tableaux. Dans Marius, chaque document déposé alimente le dossier et est contrôlé par Marius IA. La donnée est saisie une fois, puis affichée sous plusieurs vues. Ligne de partage : Marius structure, coordonne, trace et consolide ; le SPEE décide, contrôle, comptabilise et paie.">
   <div class="kicker">Le principe</div>
   <h2>De vos fichiers à une seule fiche</h2>
   <table style="margin-top:1vh">
@@ -128,6 +128,7 @@ td{padding:1vh 1.4vh;border-bottom:1px solid var(--n300)}
     <tr><td>SCORING QUALIFICATION, commissions</td><td>Qualification paramétrable et décision</td><td><span class="tag">SPEE · Qualification</span></td></tr>
     <tr><td>SUIVI FACTURATION (onglet RECAP)</td><td>RECAP par lot, appels de fonds, versements</td><td><span class="tag">SPEE · RECAP</span></td></tr>
     <tr><td>ANALYSE FINANCIÈRE, quotes-parts</td><td>Plans individuels, éco-PTZ, pièces et analyse</td><td><span class="tag">SPEE · Financement</span></td></tr>
+    <tr><td>Dossiers OneDrive / SharePoint, pièces reçues par mail</td><td>Onglet Documents rangé par phase, dépôt intelligent : <b>Marius IA lit chaque pièce, en extrait les données et contrôle leur cohérence avec le dossier</b></td><td><span class="tag">Dossier · Documents</span> <span class="tag ai"><i class="ph-light ph-sparkle"></i>Marius IA</span></td></tr>
   </table>
   <div class="q" style="margin-top:auto"><i class="ph-light ph-scales"></i><span><b>Marius structure, coordonne, trace et consolide.</b> Le SPEE décide, contrôle, comptabilise et paie.</span></div>
 </section>
@@ -153,9 +154,23 @@ td{padding:1vh 1.4vh;border-bottom:1px solid var(--n300)}
   <div class="split">
     <div class="answers">
       <h2>La Résidence Vauban</h2>
-      <ul><li><b>La Copro</b> : identité, Bilan initial, enquête sociale</li><li><b>Mission</b> : le parcours en 6 phases</li><li><b>Documents, Historique</b> : pièces, signatures horodatées</li><li><b>Messagerie</b> : tous les échanges au même endroit</li></ul>
+      <ul><li><b>La Copro</b> : identité, Bilan initial, enquête sociale</li><li><b>Mission</b> : le parcours en 6 phases</li><li><b>Documents</b> : rangés par phase, lus par Marius IA</li><li><b>Historique</b> : signatures et actions horodatées</li><li><b>Messagerie</b> : tous les échanges au même endroit</li></ul>
       <div class="replaces">Remplace : BDD PROJET, OneNote, échanges dispersés</div>
       <a class="btn" target="_blank" href="../?vue=amo&onglet=lacopro"><i class="ph-light ph-arrow-square-in"></i>Basculer sur la démo</a>
+    </div>
+    <div class="demo"><div class="frame"></div></div>
+  </div>
+</section>
+
+<!-- 6 bis -->
+<section class="slide" data-demo="../?vue=amo&onglet=documents" data-notes="Démo : onglet Documents › « Déposer » sur un document attendu (ex. Facture solde THERMIS BTP) ou « Déposer un document » › exemple « Facture de solde THERMIS BTP ». Montrer les 4 étapes de lecture, les champs extraits en violet, le point d'attention en orange (réception non prononcée), puis « Valider et transcrire ». Rappeler : aujourd'hui ces pièces dorment dans OneDrive ou SharePoint et sont ressaisies dans les Excel. ❓ Combien de pièces recevez-vous par dossier ? Où sont-elles rangées aujourd'hui ?">
+  <div class="kicker">2 bis · Les documents</div>
+  <div class="split">
+    <div class="answers">
+      <h2>Du dossier partagé au dépôt intelligent</h2>
+      <ul><li><b>Aujourd'hui</b> : OneDrive ou SharePoint, pièces reçues par mail, puis ressaisies dans les tableaux</li><li><b>Dans Marius</b> : chaque pièce attendue est listée par phase, déposée par le bon acteur, tracée</li><li><span class="tag ai"><i class="ph-light ph-sparkle"></i>Marius IA</span> reconnaît le document, en extrait les données et les rapproche du dossier</li><li>Contrôle de cohérence : montants, avancement, SIRET, RGE, catégorie de ressources</li><li>Vous validez, les données sont transcrites : plus de ressaisie</li></ul>
+      <div class="replaces">Remplace : dossiers OneDrive / SharePoint, pièces par mail, ressaisie</div>
+      <a class="btn" target="_blank" href="../?vue=amo&onglet=documents"><i class="ph-light ph-arrow-square-in"></i>Basculer sur la démo</a>
     </div>
     <div class="demo"><div class="frame"></div></div>
   </div>
