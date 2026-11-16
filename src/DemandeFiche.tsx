@@ -4,32 +4,33 @@
 import React, { useEffect, useState } from "react";
 import { T, txt, Icon, Button, Tag, BlockWrapper, AlertBlock, Input, Select, Segmented, th, td, TagStatus } from "./ds";
 import { useCoproCollect, searchBan, SourceSteps } from "./CreerCopro";
+import { ScoringSPEE, computeSpee, useSpeeApi, SpeeInputs } from "./ScoringSPEE";
 
 type Demandeur = { type: "Syndicat de copropriétaires" | "Syndic professionnel" | "Syndic bénévole"; nom: string; qualite: string; contact: string; mail: string };
 type Form = { k: string; v: string; dup?: string }; // dup = champ également capté par API (libellé du champ API)
 export type Demande = { id: string; ref: string; nom: string; adresse: string; recue: string; origine: string; demandeur: Demandeur; form: Form[]; docs: string[];
-  impayes: number; fonds: number; csActifs: number; agPrevue: boolean; decision: string; orientation: string; co: string };
+  impayes: number; fonds: number; csActifs: number; agPrevue: boolean; decision: string; orientation: string; co: string; spee: SpeeInputs };
 
 export const DEMANDES_INIT: Demande[] = [
   { id: "D1", ref: "DEM-2026-0412", nom: "Résidence Inkermann", adresse: "37 Rue Inkermann 59000 Lille", recue: "04/11/2026", origine: "Formulaire en ligne · site du SPEE",
     demandeur: { type: "Syndicat de copropriétaires", nom: "Conseil syndical, M. Hennebelle (président)", qualite: "Président du conseil syndical", contact: "06 •• •• •• 41", mail: "cs.inkermann@example.fr" },
     form: [{ k: "Motivation", v: "Factures de chauffage en forte hausse, inconfort l'hiver, façades à ravaler" }, { k: "Travaux envisagés", v: "Isolation des façades, remplacement de la chaudière collective" },
       { k: "Nombre de lots (déclaré)", v: "22", dup: "Lots (total)" }, { k: "Prochaine AG", v: "Mars 2027" }, { k: "Syndic informé de la démarche", v: "Oui" }],
-    docs: ["DPE collectif 2024", "Dernier PV d'AG"], impayes: 4, fonds: 9500, csActifs: 4, agPrevue: true, decision: "À présenter", orientation: "—", co: "—" },
+    docs: ["DPE collectif 2024", "Dernier PV d'AG", "Annexes comptables 2025"], impayes: 4, fonds: 9500, csActifs: 4, agPrevue: true, spee: { prochaineAGmois: 4, anciennete: "> 10 ans", pctPO: 75, nbCopro: 19, impayes: 4, impayesSrc: "Marius IA · annexes comptables 2025", charges: "Normal", fonds: "Normal", financeSrc: "Marius IA · annexes comptables 2025", participationAG: 62, nbPostes: null, gain: null, docSrc: "Marius IA · DPE collectif 2024", relation: "Bonne", implication: "Bonne", motivation: "Bonne", dpeOuAudit: true }, decision: "À présenter", orientation: "—", co: "—" },
   { id: "D2", ref: "DEM-2026-0418", nom: "Copropriété Montebello", adresse: "3 Boulevard Montebello 59000 Lille", recue: "06/11/2026", origine: "Formulaire en ligne · site du SPEE",
     demandeur: { type: "Syndic professionnel", nom: "Cabinet Delmotte Gestion (fictif)", qualite: "Gestionnaire, mandat depuis septembre 2026", contact: "03 •• •• •• 12", mail: "copro@delmotte-gestion.example" },
     form: [{ k: "Motivation", v: "Plan pluriannuel de travaux à établir, DPE collectif obligatoire, copropriété de grande taille" }, { k: "Travaux envisagés", v: "À définir avec l'audit" },
       { k: "Prochaine AG", v: "Juin 2027" }, { k: "Accompagnement souhaité", v: "Audit, PPPT et montage financier" }],
-    docs: ["Règlement de copropriété", "Contrat de syndic"], impayes: 11, fonds: 64000, csActifs: 2, agPrevue: false, decision: "À présenter", orientation: "—", co: "—" },
+    docs: ["Règlement de copropriété", "Contrat de syndic"], impayes: 11, fonds: 64000, csActifs: 2, agPrevue: false, spee: { prochaineAGmois: 7, anciennete: "< 5 ans", pctPO: null, nbCopro: null, impayes: 11, impayesSrc: "Formulaire (déclaré)", charges: "", fonds: "", financeSrc: "", participationAG: null, nbPostes: null, gain: null, docSrc: "", relation: "", implication: "", motivation: "", dpeOuAudit: false }, decision: "À présenter", orientation: "—", co: "—" },
   { id: "D3", ref: "DEM-2026-0421", nom: "Résidence Foch", adresse: "16 Avenue Foch 59800 Lille", recue: "07/11/2026", origine: "Prescripteur · Maison de l'Habitat Durable",
     demandeur: { type: "Syndicat de copropriétaires", nom: "Conseil syndical, Mme Verhaeghe (présidente)", qualite: "Présidente du conseil syndical", contact: "06 •• •• •• 87", mail: "cs.foch@example.fr" },
     form: [{ k: "Motivation", v: "Toiture-terrasse fuyarde, souhait d'une rénovation globale" }, { k: "Travaux envisagés", v: "Toiture, isolation, menuiseries" },
       { k: "Année de construction (déclarée)", v: "1972", dup: "Année de construction" }, { k: "Prochaine AG", v: "Avril 2027" }, { k: "Syndic informé de la démarche", v: "Oui" }],
-    docs: ["DTG 2023", "Devis toiture"], impayes: 6, fonds: 12000, csActifs: 3, agPrevue: true, decision: "À présenter", orientation: "—", co: "—" },
+    docs: ["DTG 2023", "Devis toiture"], impayes: 6, fonds: 12000, csActifs: 3, agPrevue: true, spee: { prochaineAGmois: 5, anciennete: "> 5 ans", pctPO: 60, nbCopro: 20, impayes: 6, impayesSrc: "Formulaire (déclaré)", charges: "", fonds: "", financeSrc: "", participationAG: null, nbPostes: 4, gain: null, docSrc: "Marius IA · DTG 2023", relation: "Moyenne", implication: "Bonne", motivation: "Bonne", dpeOuAudit: true }, decision: "À présenter", orientation: "—", co: "—" },
   { id: "D4", ref: "DEM-2026-0430", nom: "Résidence du Peuple Belge", adresse: "80 Avenue du Peuple Belge 59800 Lille", recue: "10/11/2026", origine: "Formulaire en ligne · site du SPEE",
     demandeur: { type: "Syndic bénévole", nom: "M. Lambrecht, syndic bénévole", qualite: "Copropriétaire, syndic bénévole élu en AG", contact: "07 •• •• •• 05", mail: "syndic.peuplebelge@example.fr" },
     form: [{ k: "Motivation", v: "Copropriétaires âgés, logements froids, peu de moyens" }, { k: "Travaux envisagés", v: "Isolation et ventilation" }, { k: "Prochaine AG", v: "Non fixée" }],
-    docs: [], impayes: 18, fonds: 0, csActifs: 1, agPrevue: false, decision: "À présenter", orientation: "—", co: "—" },
+    docs: [], impayes: 18, fonds: 0, csActifs: 1, agPrevue: false, spee: { prochaineAGmois: null, anciennete: "", pctPO: 85, nbCopro: 22, impayes: 18, impayesSrc: "Formulaire (déclaré)", charges: "", fonds: "", financeSrc: "", participationAG: 35, nbPostes: null, gain: null, docSrc: "", relation: "", implication: "", motivation: "", dpeOuAudit: false }, decision: "À présenter", orientation: "—", co: "—" },
 ];
 export const COS = ["Claire V.", "Mathieu P.", "Thomas R.", "Inès B.", "Karim L."];
 
@@ -42,7 +43,7 @@ const CRITS = [
   { id: "cs", label: "Conseil syndical moteur", fam: "Projet", poids: 3 },
   { id: "ag", label: "Projet inscrit en AG", fam: "Projet", poids: 2 },
 ];
-const tone = (s: number): TagStatus => s >= 70 ? "Success" : s >= 45 ? "Warning" : "Error";
+const tone = (s: number): TagStatus => s > 70 ? "Success" : s >= 30 ? "Warning" : "Error";
 const decTag = (d: string): TagStatus => d.startsWith("Projet") ? "Success" : d === "Ajournée" ? "Warning" : "Grey";
 
 // ── Liste des demandes ─────────────────────────────────────────────────
@@ -70,6 +71,8 @@ export function DemandeFiche({ d, onBack, onDecide }: { d: Demande; onBack: () =
   const C = useCoproCollect();
   const [notes, setNotes] = useState<Record<string, number>>({});
   const [manual, setManual] = useState<Record<string, boolean>>({});
+  const [si, setSi] = useState<SpeeInputs>(d.spee);
+  const X = useSpeeApi(C.adr);
   const [dest, setDest] = useState<"spee" | "operateur">("spee");
   const [op, setOp] = useState("Urbanis"); const [autre, setAutre] = useState(""); const [co, setCo] = useState(COS[0]);
   const done = d.decision.startsWith("Projet");
@@ -87,9 +90,10 @@ export function DemandeFiche({ d, onBack, onDecide }: { d: Demande; onBack: () =
     cs: { n: d.csActifs >= 3 ? 3 : d.csActifs >= 2 ? 2 : d.csActifs, src: `Formulaire · ${d.csActifs} membre${d.csActifs > 1 ? "s" : ""} actif${d.csActifs > 1 ? "s" : ""}` },
     ag: { n: d.agPrevue ? 2 : 0, src: `Formulaire · ${d.form.find(f => f.k === "Prochaine AG")?.v || "—"}` },
   };
-  const note = (id: string) => manual[id] ? notes[id] : auto[id].n;
-  const max = CRITS.reduce((a, c) => a + c.poids * 3, 0);
-  const score = Math.round(CRITS.reduce((a, c) => a + note(c.id) * c.poids, 0) / max * 100);
+  const inds = computeSpee(C.fields, C.dpe, X, si, d.demandeur.type);
+  const score = inds.reduce((a, x) => a + (x.pts || 0), 0);
+  const qpv = (C.fields.find(f => f.k === "Programmes / quartiers")?.v || "");
+  const fragile = (si.impayes != null && si.impayes > 8) || /QPV|sauvegarde/i.test(qpv) ? [si.impayes != null && si.impayes > 8 ? `impayés à ${si.impayes} % (> 8 %)` : "", /QPV|sauvegarde/i.test(qpv) ? qpv : ""].filter(Boolean).join(" · ") + " : critère de fragilité de la grille SPEE (NPNRU ou impayés > 8 %)." : null;
   const lots = Number(api("Lots d'habitation") || api("Logements (bâtiment)") || d.form.find(f => f.dup === "Lots (total)")?.v || 0);
   const progs = api("Programmes / quartiers");
   const formOnly = d.form.filter(f => !f.dup);
@@ -154,15 +158,6 @@ export function DemandeFiche({ d, onBack, onDecide }: { d: Demande; onBack: () =
           {progs && progs !== "aucun" && <AlertBlock type="Info" title="Programme ou quartier prioritaire">{progs} : à prendre en compte pour la priorisation et les aides locales.</AlertBlock>}
         </BlockWrapper>
 
-        <BlockWrapper title="Score de qualification" icon="sliders" right={<Tag label={`${score} / 100`} status={tone(score)} size="Medium" />}>
-          <span style={txt.bodyXS}>Notes proposées à partir du formulaire et des API, modifiables par le chargé d'opération. Priorisation opérationnelle, pas un scoring bancaire.</span>
-          {CRITS.map(c => (
-            <div key={c.id} style={{ display: "flex", alignItems: "center", gap: 12 }}>
-              <span style={{ ...txt.bodyS, flex: 1 }}>{c.label} <span style={txt.bodyXS}>(× {c.poids})</span><div style={{ ...txt.bodyXS, color: manual[c.id] ? T.b500 : T.ai500 }}>{manual[c.id] ? "Ajusté par le CO" : auto[c.id].src}</div></span>
-              <Segmented value={String(note(c.id))} onChange={v => { setNotes(n => ({ ...n, [c.id]: Number(v) })); setManual(m => ({ ...m, [c.id]: true })); }} options={["0", "1", "2", "3"].map(v => ({ v, label: v }))} />
-            </div>))}
-        </BlockWrapper>
-
         <BlockWrapper type="Edit" title="Créer le projet" icon="rocket-launch"
           footerLeft={!done ? <Button size="Small" aspect="Outline" label="Ajourner" onClick={() => onDecide({ decision: "Ajournée", orientation: "—", co: "—", lots, mode: "Full" })} /> : undefined}
           footerRight={!done ? <Button size="Small" aspect="Plain" icon="rocket-launch" label="Créer le projet" disabled={dest === "operateur" && op === "Autre" && !autre.trim()}
@@ -180,5 +175,6 @@ export function DemandeFiche({ d, onBack, onDecide }: { d: Demande; onBack: () =
         </BlockWrapper>
       </div>
     </div>
+    <ScoringSPEE inds={inds} fragile={fragile} nbCopro={si.nbCopro} onCo={(key, v) => setSi(x => ({ ...x, [key]: v }))} />
   </>);
 }
