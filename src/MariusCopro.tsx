@@ -4,6 +4,7 @@ import { useFile } from "@dust/react-hooks";
 import SpeeView from "./SpeeReseau";
 import DepotIA, { DepotResult } from "./DepotIA";
 import AmoSyndics from "./AmoSyndics";
+import NouveauProjet, { NewMission } from "./NouveauProjet";
 import { LIGHT_LOCKED, LIGHT, LightBanner, LockedFeature, ParcoursQualiteLight } from "./LightAccess";
 import { CheckCircle2, Clock, AlertCircle, Send, FileText, Info, Banknote } from "lucide-react";
 
@@ -9460,6 +9461,9 @@ export default function MariusCopro() {
   // Vue active (AMO ou Financeur)
   type ViewMode = "amo" | "financeur" | "conseil" | "copro" | "syndic" | "moe" | "spee" | "light";
   const [viewMode,    setViewMode]    = useState<ViewMode>(()=>{const v=new URLSearchParams(window.location.search).get("vue");return (v||"amo") as ViewMode;});
+  const [newMissions, setNewMissions] = useState<NewMission[]>([]);
+  const [showNP, setShowNP] = useState(false);
+  const [npToast, setNpToast] = useState<string|null>(null);
   useEffect(()=>{const u=new URL(window.location.href);u.searchParams.set("vue",viewMode);window.history.replaceState(null,"",u.toString());},[viewMode]);
   const [userMenuOpen,setUserMenuOpen]= useState(false);
 
@@ -16020,7 +16024,7 @@ export default function MariusCopro() {
         )}
         {/* ── AMO PORTFOLIO — Multi-copros ── */}
         {amoPage==="portfolio"&&(()=>{
-          const AMO_COPROS=[
+          const AMO_COPROS:any[]=[...newMissions,
             {id:"vauban",    nom:"La Résidence Vauban",       adresse:"24 rue Gambetta, 59000 Lille",                lots:12,  phase:"Phase 5",  sousPhase:"Travaux · ITE en cours",   relances:3, echeance:"30/07/2025 · Facture THERMIS",   sante:"vert",  budget:"290 950 €", dpe:"E→C"},
             {id:"faidherbe", nom:"Les Terrasses Faidherbe",   adresse:"14 r. Maréchal Faidherbe, 59000 Lille",      lots:18,  phase:"Phase 2",  sousPhase:"Audit énergétique",          relances:5, echeance:"15/08/2025 · Rapport audit",     sante:"orange",budget:"350 000 €", dpe:"F→C"},
             {id:"parc",      nom:"Résidence du Parc Barbieux",adresse:"3 avenue du Parc, 59100 Roubaix",            lots:24,  phase:"Phase 3",  sousPhase:"Consultation entreprises",   relances:0, echeance:"01/09/2025 · AG vote travaux",   sante:"vert",  budget:"520 000 €", dpe:"E→B"},
@@ -16040,12 +16044,15 @@ export default function MariusCopro() {
           };
           return(
             <div style={{padding:"24px 32px",overflowY:"auto"}}>
+              {showNP&&<NouveauProjet onClose={()=>setShowNP(false)} onCreate={m=>{setNewMissions(x=>[m,...x]);setShowNP(false);setNpToast(`Mission « ${m.nom} » créée · ${m.nbChamps} champs intégrés`);setTimeout(()=>setNpToast(null),4000);}}/>}
+              {npToast&&<div style={{position:"fixed",bottom:"96px",right:"24px",zIndex:1200,background:"#225725",color:"#FBFBFB",padding:"12px 16px",borderRadius:"4px",fontSize:"14px",display:"flex",gap:"8px",alignItems:"center"}}><i className="ph-light ph-check-circle" style={{fontSize:"16px"}}/>{npToast}</div>}
               <div style={{display:"flex",alignItems:"flex-start",justifyContent:"space-between",marginBottom:"24px"}}>
                 <div>
                   <h2 style={{margin:"0 0 4px",fontSize:"20px",fontWeight:700,color:C.primary,fontFamily:"Montserrat,sans-serif"}}>Mes Missions Copro</h2>
                   <p style={{margin:0,color:"#587A89",fontSize:"12px"}}>{AMO_COPROS.length} copropriétés · {AMO_COPROS.filter(c=>c.sante!=="gris").length} projets actifs · {AMO_COPROS.filter(c=>c.relances>0).reduce((s,c)=>s+c.relances,0)} relances en attente</p>
                 </div>
                 <div style={{display:"flex",gap:"8px",alignItems:"center"}}>
+                  <button onClick={()=>setShowNP(true)} style={{fontFamily:"Montserrat,sans-serif",display:"inline-flex",alignItems:"center",gap:"4px",height:"32px",padding:"0 12px",background:"#2E596B",color:"#FBFBFB",border:"1px solid #2E596B",borderRadius:"4px",fontSize:"14px",fontWeight:600,cursor:"pointer",marginRight:"8px"}}><i className="ph-light ph-plus-circle" style={{fontSize:"16px"}}/>Nouveau projet</button>
                   {["vert","orange","rouge","gris"].map(s=>{const st=SANTE_STYLE[s];const n=AMO_COPROS.filter(c=>c.sante===s).length;return(<span key={s} style={{background:st.bg,color:st.c,borderRadius:"999px",padding:"4px 12px",fontSize:"12px",fontWeight:700,border:`1px solid ${st.dot}40`}}>{st.label} · {n}</span>);})}
                 </div>
               </div>
@@ -16075,8 +16082,9 @@ export default function MariusCopro() {
                                 <div style={{fontWeight:700,color:C.primary,fontSize:"12px",display:"flex",alignItems:"center",gap:"8px"}}>
                                   {c.nom}
                                   {isVauban&&<span style={{background:C.secondary+"18",color:C.secondary,borderRadius:"4px",padding:"2px 8px",fontSize:"10px",fontWeight:700}}>Dossier ouvert</span>}
+                                  {c.nbChamps!=null&&<span style={{background:"#F7E6FF",color:"#6A009C",borderRadius:"12px",padding:"0 8px",fontSize:"10px",fontWeight:500,lineHeight:"16px",display:"inline-flex",alignItems:"center",gap:"4px"}}><i className="ph-light ph-sparkle" style={{fontSize:"12px"}}/>Nouveau · {c.nbChamps} champs pré-remplis</span>}
                                 </div>
-                                <div style={{fontSize:"10px",color:"#9FB3BB",marginTop:"2px"}}>{c.adresse} · {c.lots} lots</div>
+                                <div style={{fontSize:"10px",color:"#9FB3BB",marginTop:"2px"}}>{c.adresse} · {c.lots} lots{c.syndic?` · ${c.syndic}`:""}</div>
                               </div>
                             </div>
                           </td>

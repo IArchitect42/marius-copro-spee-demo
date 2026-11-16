@@ -7,7 +7,7 @@ const PHASES = ["0 · Identification", "1 · Diagnostic", "2 · Études", "3 · 
 type Mission = { id: string; nom: string; ville: string; lots: number; phase: number; av: number; sante: "vert" | "orange" | "rouge" | "gris"; derniere: { date: string; quoi: string; qui: string }; prochaine: string; vauban?: boolean };
 type Syndic = { id: string; nom: string; type: "Professionnel" | "Bénévole"; gestionnaire: string; tel: string; mail: string; ville: string; depuis: string; missions: Mission[] };
 
-const SYNDICS: Syndic[] = [
+export const SYNDICS: Syndic[] = [
   { id: "lecomte", nom: "Cabinet Lecomte", type: "Professionnel", gestionnaire: "Bertrand Lecomte", tel: "03 20 54 67 88", mail: "contact@lecomte-syndic.fr", ville: "Lille", depuis: "2024", missions: [
     { id: "vauban", nom: "La Résidence Vauban", ville: "Lille", lots: 12, phase: 5, av: 68, sante: "vert", derniere: { date: "14/11/2026", quoi: "Facture THERMIS BTP transmise pour validation", qui: "AMO" }, prochaine: "Valider la facture THERMIS · 20/11", vauban: true },
     { id: "clairef", nom: "Résidence Clairfontaine", ville: "Marcq-en-Barœul", lots: 16, phase: 1, av: 18, sante: "orange", derniere: { date: "02/11/2026", quoi: "Relance du syndic : DPE collectif manquant", qui: "AMO" }, prochaine: "Recevoir le DPE collectif · 25/11" },

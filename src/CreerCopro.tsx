@@ -13,37 +13,24 @@ const qs = (o: Record<string, string | number>) => Object.entries(o).map(([k, v]
 
 type Adr = { label: string; id: string; citycode: string; lat: number; lon: number };
 type Src = "BAN" | "RNIC" | "Cadastre" | "BDNB" | "DPE ADEME" | "SIRENE";
-type Field = { k: string; v: string; src: Src; warn?: string };
+export type Field = { k: string; v: string; src: Src; warn?: string; dest?: string };
+export type { Adr, Src, Step };
 type Step = { src: Src; label: string; state: "wait" | "run" | "ok" | "none" | "err"; info?: string };
 const PER: Record<string, string> = { AVANT_1949: "avant 1949", DE_1949_A_1960: "1949 – 1960", DE_1961_A_1974: "1961 – 1974", DE_1975_A_1993: "1975 – 1993", DE_1994_A_2000: "1994 – 2000", DE_2001_A_2010: "2001 – 2010", A_COMPTER_DE_2011: "depuis 2011", NON_CONNUE: "non connue" };
 const SRC_TAG: Record<Src, string> = { BAN: "Adresse BAN", RNIC: "Registre copros", Cadastre: "Cadastre", BDNB: "BDNB", "DPE ADEME": "DPE ADEME", SIRENE: "SIRENE" };
 
 const EXEMPLES = [{ label: "37 rue Inkermann, Lille", q: "37 Rue Inkermann 59000 Lille" }, { label: "3 bd de Montebello, Lille (817 lots)", q: "3 Boulevard Montebello 59000 Lille" }, { label: "N° AB5691118", immat: "AB5691118" }];
 
-export default function CreerCopro() {
-  const [mode, setMode] = useState<"adresse" | "immat">("adresse");
-  const [q, setQ] = useState(""); const [sugg, setSugg] = useState<Adr[]>([]); const [immat, setImmat] = useState("");
+export function useCoproCollect() {
   const [steps, setSteps] = useState<Step[]>([]); const [fields, setFields] = useState<Field[]>([]);
   const [cands, setCands] = useState<any[]>([]); const [dpe, setDpe] = useState<{ total: number; rep: Record<string, number> } | null>(null);
-  const [adr, setAdr] = useState<Adr | null>(null); const [done, setDone] = useState(false); const [created, setCreated] = useState(false);
-  const tmr = useRef<any>(null);
-
-  useEffect(() => {
-    if (mode !== "adresse" || q.length < 4 || adr?.label === q) { setSugg([]); return; }
-    clearTimeout(tmr.current);
-    tmr.current = setTimeout(async () => {
-      try {
-        const g = await getJ("https://data.geopf.fr/geocodage/search?index=address&autocomplete=1&limit=5&q=" + encodeURIComponent(q));
-        setSugg(g.features.map((f: any) => ({ label: f.properties.label, id: f.properties.id, citycode: f.properties.citycode, lon: f.geometry.coordinates[0], lat: f.geometry.coordinates[1] })));
-      } catch { setSugg([]); }
-    }, 300);
-  }, [q, mode]);
+  const [adr, setAdr] = useState<Adr | null>(null); const [done, setDone] = useState(false);
 
   const setStep = (src: Src, p: Partial<Step>) => setSteps(ss => ss.map(s => s.src === src ? { ...s, ...p } : s));
   const add = (f: Field[]) => setFields(fs => [...fs, ...f]);
 
   async function run(a: Adr | null, immatNo?: string) {
-    setDone(false); setCreated(false); setFields([]); setCands([]); setDpe(null); setSugg([]);
+    setDone(false); setFields([]); setCands([]); setDpe(null);
     setSteps((["BAN", "BDNB", "RNIC", "Cadastre", "DPE ADEME", "SIRENE"] as Src[]).map(src => ({ src, label: SRC_TAG[src], state: "wait" })));
     let rn: any = null;
     try {
@@ -59,7 +46,7 @@ export default function CreerCopro() {
         a = f ? { label: f.properties.label, id: f.properties.id, citycode: f.properties.citycode, lon: f.geometry.coordinates[0], lat: f.geometry.coordinates[1] } : null;
       }
       if (!a) { setStep("BAN", { state: "err", info: "adresse introuvable" }); setDone(true); return; }
-      setAdr(a); setQ(a.label);
+      setAdr(a);
       setStep("BAN", { state: "ok", info: a.id });
       add([{ k: "Adresse", v: a.label, src: "BAN" }, { k: "Identifiant BAN", v: a.id, src: "BAN" }, { k: "Code commune (INSEE)", v: a.citycode, src: "BAN" }]);
 
@@ -163,6 +150,40 @@ export default function CreerCopro() {
     } else setStep("SIRENE", { state: "none", info: "pas de SIRET au registre" });
   }
 
+  const reset = () => { setSteps([]); setFields([]); setCands([]); setDpe(null); setAdr(null); setDone(false); };
+  return { steps, fields, setFields, cands, dpe, adr, done, run, applyRnic, reset };
+}
+
+export async function searchBan(q: string): Promise<Adr[]> {
+  const g = await getJ("https://data.geopf.fr/geocodage/search?index=address&autocomplete=1&limit=5&q=" + encodeURIComponent(q));
+  return g.features.map((f: any) => ({ label: f.properties.label, id: f.properties.id, citycode: f.properties.citycode, lon: f.geometry.coordinates[0], lat: f.geometry.coordinates[1] }));
+}
+
+export function SourceSteps({ steps }: { steps: Step[] }) {
+  const ic = (s: Step["state"]) => s === "ok" ? ["check-circle", T.g500] : s === "run" ? ["sparkle", T.ai500] : s === "none" ? ["minus-circle", T.o500] : s === "err" ? ["warning-circle", T.r500] : ["circle-dashed", T.n700];
+  return (
+    <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+      {steps.map(s => { const [i, c] = ic(s.state); return (
+        <div key={s.src} style={{ display: "flex", alignItems: "center", gap: 8, padding: "8px 12px", borderRadius: 8, background: T.n100, ...txt.bodyS }}>
+          <Icon n={i} size={16} color={c} /><b>{s.label}</b>{s.info && <span style={{ ...txt.bodyXS }}>{s.info}</span>}
+        </div>); })}
+    </div>
+  );
+}
+
+export default function CreerCopro() {
+  const [mode, setMode] = useState<"adresse" | "immat">("adresse");
+  const [q, setQ] = useState(""); const [sugg, setSugg] = useState<Adr[]>([]); const [immat, setImmat] = useState("");
+  const [created, setCreated] = useState(false);
+  const tmr = useRef<any>(null);
+  const { steps, fields, cands, dpe, adr, done, run: run0, applyRnic } = useCoproCollect();
+  const run = (a: Adr | null, im?: string) => { setSugg([]); setCreated(false); if (a) setQ(a.label); return run0(a, im); };
+  const setAdr = (_: any) => {};
+  useEffect(() => {
+    if (mode !== "adresse" || q.length < 4 || adr?.label === q) { setSugg([]); return; }
+    clearTimeout(tmr.current);
+    tmr.current = setTimeout(async () => { try { setSugg(await searchBan(q)); } catch { setSugg([]); } }, 300);
+  }, [q, mode]);
   const ic = (s: Step["state"]) => s === "ok" ? ["check-circle", T.g500] : s === "run" ? ["sparkle", T.ai500] : s === "none" ? ["minus-circle", T.o500] : s === "err" ? ["warning-circle", T.r500] : ["circle-dashed", T.n700];
   const warns = fields.filter(f => f.warn).length;
   const DPE_C: Record<string, string> = { A: "#009C6D", B: "#52B153", C: "#A5CC74", D: "#F4E70F", E: "#F0B40F", F: "#EB8235", G: "#D7221F" };
