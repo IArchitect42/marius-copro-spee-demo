@@ -1547,7 +1547,7 @@ function DocumentsTab() {
   const [docSubTab, setDocSubTab] = useState<'documents'|'signatures'>('documents');
   const [phasesDocs, setPhasesDocs] = useState<PhaseDoc[]>(PHASES_DOCS);
   const autoDepot = new URLSearchParams(window.location.search).get("depot");
-  const [depot, setDepot] = useState<{slot?:string;phaseId?:number;auto?:string}|null>(()=>autoDepot==="facture"?{slot:"Facture solde THERMIS BTP",phaseId:5,auto:"facture-solde-thermis.pdf"}:autoDepot==="avis"?{auto:"avis-imposition-lot6.pdf"}:autoDepot==="pv"?{slot:"PV réception ITE",phaseId:5,auto:"pv-reception-ite.pdf"}:null);
+  const [depot, setDepot] = useState<{slot?:string;phaseId?:number;auto?:string}|null>(()=>autoDepot==="facture"?{slot:"Facture solde THERMIS BTP",phaseId:5,auto:"facture-solde-thermis.pdf"}:autoDepot==="avis"?{auto:"avis-imposition-lot6.pdf"}:autoDepot==="pv"?{slot:"PV réception ITE",phaseId:5,auto:"pv-reception-ite.pdf"}:autoDepot==="audit"?{auto:"audit-energetique-copro-vauban.pdf"}:null);
   const [iaToast, setIaToast] = useState<string|null>(null);
   const onDepot = (r:DepotResult) => {
     const byKind:Record<string,number> = {facture:5,devis:5,pv:5,audit:1,avis:1,anah:6,autre:5};

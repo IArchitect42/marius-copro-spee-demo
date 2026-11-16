@@ -4,7 +4,7 @@ import React, { useRef, useState } from "react";
 import { T, F, txt, Icon, Button, Tag, AlertBlock, Input, Select } from "./ds";
 
 export type DocKind = "facture" | "devis" | "pv" | "audit" | "avis" | "anah" | "autre";
-type Fld = { k: string; v: string; warn?: string };
+type Fld = { k: string; v: string; warn?: string; ok?: string; group?: string };
 export type DepotResult = { name: string; type: string; by: string; montant?: string; kind: DocKind; fields: Fld[]; dest: string };
 
 const KIND_LABEL: Record<DocKind, string> = { facture: "Facture artisan", devis: "Devis artisan", pv: "PV de réception", audit: "Audit énergétique", avis: "Avis d'imposition", anah: "Courrier ANAH", autre: "Autre document" };
@@ -54,11 +54,44 @@ function extract(kind: DocKind, hint: string): { fields: Fld[]; by: string; mont
         { k: "Décision", v: "Réception avec réserves" }, { k: "Nombre de réserves", v: "3", warn: "3 réserves à lever sous 30 jours" },
         { k: "Signataires", v: "Président CS, syndic, MOE, entreprise" },
       ] };
-    case "audit": return { by: "Nord Énergie Conseil", name: "Audit énergétique — mise à jour", dest: "Projet › état initial et scénarios",
-      resume: "Données transcrites dans l'onglet Projet. Gain supérieur à 35 % : éligible à MaPrimeRénov' Copropriété.",
+    case "audit": return { by: "Nord Énergie Conseil", name: "Audit énergétique copropriété — rapport définitif", dest: "La Copro › Bilan initial · Projet › état initial et scénarios · Financement",
+      resume: "Audit de copropriété reconnu : 3 scénarios, scénario 2 retenu (rénovation globale). Données transcrites dans la fiche, l'état initial, le programme de travaux et le plan de financement. Gain supérieur à 35 % : éligible à MaPrimeRénov' Copropriété.",
       fields: [
-        { k: "Étiquette avant travaux", v: "E · 245 kWhEP/m².an" }, { k: "Étiquette après scénario retenu", v: "C · 118 kWhEP/m².an" },
-        { k: "Gain énergétique", v: "− 52 %" }, { k: "Émissions GES", v: "52 → 14 kgCO₂/m².an" }, { k: "Bureau d'études", v: "Nord Énergie Conseil" },
+        { group: "Identification de l'audit", k: "Numéro de l'audit", v: "AUD-COPRO-2025-0417" },
+        { group: "Identification de l'audit", k: "Date de réalisation de l'audit", v: "15/03/2025" },
+        { group: "Identification de l'audit", k: "Nom de l'auditeur", v: "Nord Énergie Conseil · M. Carpentier" },
+        { group: "Identification de l'audit", k: "Numéro SIRET de l'auditeur", v: "831 204 556 00018", ok: "SIRET actif · qualification RGE Études vérifiée" },
+        { group: "Copropriété auditée", k: "Adresse de la copropriété auditée", v: "24 rue Gambetta" },
+        { group: "Copropriété auditée", k: "Code postal", v: "59000" },
+        { group: "Copropriété auditée", k: "Ville", v: "Lille" },
+        { group: "Copropriété auditée", k: "Type de bien", v: "Immeuble collectif en copropriété · 12 lots d'habitation" },
+        { group: "Copropriété auditée", k: "Année de construction", v: "1978", ok: "Cohérent avec le Bilan initial" },
+        { group: "Copropriété auditée", k: "Syndicat de copropriétaires (maître d'ouvrage)", v: "SDC Résidence Vauban, représenté par le Cabinet Lecomte" },
+        { group: "État initial", k: "Surface de référence avant travaux", v: "2 105 m²", warn: "Écart avec le Bilan initial (2 072 m² habitables) : préciser la surface de référence retenue" },
+        { group: "État initial", k: "Classe de performance énergétique initiale", v: "E" },
+        { group: "État initial", k: "Consommation primaire avant travaux", v: "245 kWhEP/m².an" },
+        { group: "État initial", k: "Consommation finale avant travaux", v: "198 kWhEF/m².an" },
+        { group: "État initial", k: "Émissions de GES avant travaux", v: "52 kgCO₂/m².an" },
+        { group: "État initial", k: "Dépenses énergétiques estimées / an avant travaux", v: "38 600 €" },
+        { group: "Scénario retenu", k: "Scénario de travaux retenu", v: "Scénario 2 sur 3 · rénovation globale" },
+        { group: "Scénario retenu", k: "Classe de performance énergétique scénario retenu", v: "C", ok: "Saut de 2 classes : bonus sortie de passoire non applicable (E → C), MPR Copro 45 %" },
+        { group: "Scénario retenu", k: "Consommation primaire après travaux", v: "118 kWhEP/m².an" },
+        { group: "Scénario retenu", k: "Consommation finale après travaux", v: "92 kWhEF/m².an" },
+        { group: "Scénario retenu", k: "Émissions de GES après travaux", v: "14 kgCO₂/m².an" },
+        { group: "Scénario retenu", k: "Économie d'énergie par rapport à l'état initial", v: "52 %", ok: "≥ 35 % : condition MaPrimeRénov' Copropriété remplie" },
+        { group: "Scénario retenu", k: "Surface de référence après travaux", v: "2 105 m²" },
+        { group: "Scénario retenu", k: "Dépenses énergétiques estimées / an après travaux", v: "17 900 €" },
+        { group: "Scénario retenu", k: "Coût TTC du scénario de travaux", v: "290 950 €", ok: "Identique au plan de financement du dossier" },
+        { group: "Postes de travaux du scénario", k: "Poste 1 · Isolation thermique par l'extérieur", v: "Façades, PSE 14 cm, R = 3,7 · 91 785 € TTC" },
+        { group: "Postes de travaux du scénario", k: "Poste 2 · Isolation des combles perdus", v: "Laine soufflée 32 cm, R = 7 · 45 365 € TTC" },
+        { group: "Postes de travaux du scénario", k: "Poste 3 · Pompe à chaleur air/eau collective", v: "Remplacement chaudière gaz 1999 · 80 220 € TTC" },
+        { group: "Postes de travaux du scénario", k: "Poste 4 · VMC double flux collective", v: "12 logements · 33 760 € TTC" },
+        { group: "Postes de travaux du scénario", k: "Poste 5 · Calorifugeage des réseaux", v: "Réseau de chauffage en sous-sol · 11 605 € TTC" },
+        { group: "Postes de travaux du scénario", k: "Poste 6 · Honoraires AMO et maîtrise d'œuvre", v: "28 215 € TTC" },
+        { group: "Aides du scénario", k: "Aide nationale 1 · MaPrimeRénov' Copropriété", v: "131 128 €" },
+        { group: "Aides du scénario", k: "Aide nationale 2 · Certificats d'économies d'énergie", v: "16 875 €" },
+        { group: "Aides du scénario", k: "Aide locale 1 · Prime MEL rénovation performante", v: "12 000 € (1 000 € × 12 lots)" },
+        { group: "Aides du scénario", k: "Aide nationale 3 · Bonus sortie de passoire", v: "29 139 €", warn: "Incohérent avec le saut de classe E → C : bonus non applicable, à faire confirmer par l'auditeur" },
       ] };
     case "avis": return { by: "Copropriétaire", name: "Avis d'imposition — lot 6 (Mme Duquesnoy)", dest: "La Copro › enquête sociale, lot 6",
       resume: "Catégorie de ressources déterminée : l'enquête sociale et le plan de financement individuel du lot 6 sont mis à jour.",
@@ -74,6 +107,7 @@ function extract(kind: DocKind, hint: string): { fields: Fld[]; by: string; mont
 }
 
 const SAMPLES: { label: string; file: string }[] = [
+  { label: "Audit énergétique copro (Nord Énergie Conseil)", file: "audit-energetique-copro-vauban.pdf" },
   { label: "Facture de solde THERMIS BTP", file: "facture-solde-thermis.pdf" },
   { label: "PV de réception ITE", file: "pv-reception-ite.pdf" },
   { label: "Devis VENTIL PRO", file: "devis-ventil-pro.pdf" },
@@ -149,12 +183,22 @@ export default function DepotIA({ slot, phaseLabel, onClose, onValidate, autoFil
             <AlertBlock type="AI" title={`${KIND_LABEL[kind]} reconnu · ${data.fields.length} champs extraits`}>
               {data.resume} Vérifiez les valeurs avant de valider : elles seront transcrites dans <b>{data.dest}</b>.
             </AlertBlock>
-            <div style={{ background: T.n200, borderRadius: 8, padding: 16, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
-              {data.fields.map((f, i) => (
-                <div key={f.k} style={{ gridColumn: f.warn ? "1 / -1" : undefined }}>
-                  <Input label={f.k} value={f.v} onChange={v => setField(i, v)} status={f.warn ? "Warning" : "AI"} subtext={f.warn || "Extrait par Marius IA"} />
-                </div>))}
-            </div>
+            {data.fields.some(f => f.warn || f.ok) && (
+              <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                <Tag label={`${data.fields.length} champs extraits`} status="AI" size="Medium" icon="sparkle" />
+                {data.fields.some(f => f.ok) && <Tag label={`${data.fields.filter(f => f.ok).length} contrôles de cohérence OK`} status="Success" size="Medium" icon="check-circle" />}
+                {data.fields.some(f => f.warn) && <Tag label={`${data.fields.filter(f => f.warn).length} incohérence${data.fields.filter(f => f.warn).length > 1 ? "s" : ""} à vérifier`} status="Warning" size="Medium" icon="warning" />}
+              </div>)}
+            {Array.from(new Set(data.fields.map(f => f.group || ""))).map(g => (
+              <div key={g} style={{ background: T.n200, borderRadius: 8, padding: 16, display: "flex", flexDirection: "column", gap: 12 }}>
+                {g && <div style={{ ...txt.bodySB }}>{g}</div>}
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+                  {data.fields.map((f, i) => (f.group || "") !== g ? null : (
+                    <div key={f.k} style={{ gridColumn: f.warn || f.v.length > 34 ? "1 / -1" : undefined }}>
+                      <Input label={f.k} value={f.v} onChange={v => setField(i, v)} status={f.warn ? "Warning" : f.ok ? "Valid" : "AI"} subtext={f.warn || f.ok || "Extrait par Marius IA"} />
+                    </div>))}
+                </div>
+              </div>))}
           </>)}
         </div>
 
