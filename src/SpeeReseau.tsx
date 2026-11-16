@@ -55,7 +55,7 @@ export default function SpeeView({ profiles, onSwitch }: { profiles: Profile[]; 
     <div style={{ display: "flex", height: "100vh", fontFamily: F.body, background: T.white }}>
       <nav style={{ width: 280, flexShrink: 0, background: T.p50, borderRight: `1px solid ${T.n500}`, display: "flex", flexDirection: "column", overflowY: "auto" }}>
         <div style={{ height: 72, display: "flex", alignItems: "center", padding: "0 20px", borderBottom: `1px solid ${T.n500}`, background: T.white }}>
-          <img src="/assets/logo-name.svg" alt="Marius" style={{ height: 36 }} />
+          <img src={`${import.meta.env.BASE_URL}assets/logo-name.svg`} alt="Marius" style={{ height: 36 }} />
         </div>
         <div style={{ padding: "16px 20px 4px", display: "flex", alignItems: "center", gap: 8 }}>
           <Tag label="Compte réseau" status="Dark" size="Medium" icon="share-network" />
