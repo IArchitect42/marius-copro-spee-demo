@@ -232,23 +232,29 @@ td{padding:1vh 1.4vh;border-bottom:1px solid var(--n300)}
 </section>
 
 <!-- 10 -->
-<section class="slide" data-demo="../?cadre=facture" data-scale="0.62" data-notes="La capture à droite est la vraie fonctionnalité : l'entreprise dépose sa facture, Marius IA la lit, extrait les champs (entreprise, SIRET, poste, montants HT/TTC) et signale l'incohérence : solde facturé alors que la réception du lot n'est pas prononcée. Le CO valide, le reste se met à jour. Le SPEE ne saisit que ce qui relève de sa décision.">
-  <div class="kicker">5 bis · Une facture, une seule saisie</div>
+<section class="slide" data-demo="../?cadre=facture" data-scale="0.62" data-notes="Le principe vaut pour tous les documents : facture, PV, audit, avis d'impôt, courrier ANAH. Utiliser les boutons au-dessus du cadre pour changer de type. Chaque document est déposé par l'acteur concerné, lu par Marius IA, contrôlé, puis ses données sont transcrites : personne ne les ressaisit. Le SPEE ne saisit que ce qui relève de sa décision.">
+  <div class="kicker">5 bis · Un document, une seule saisie</div>
   <div class="split">
     <div class="answers">
-      <h2>Le chemin d'une facture</h2>
+      <h2>Le chemin d'un document</h2>
       <ol style="margin:0;padding-left:1.2em">
-        <li>L'entreprise dépose la facture</li>
-        <li><span class="tag ai"><i class="ph-light ph-sparkle"></i>Marius IA</span> la lit, extrait les données, la rattache au lot et contrôle sa cohérence</li>
+        <li>L'acteur concerné dépose le document : entreprise, syndic, copropriétaire, auditeur, ANAH…</li>
+        <li><span class="tag ai"><i class="ph-light ph-sparkle"></i>Marius IA</span> le reconnaît, extrait ses données et contrôle leur cohérence avec le dossier</li>
         <li>Le chargé d'opération vérifie et valide</li>
-        <li>Certificat de paiement et appel de fonds pré-remplis</li>
-        <li>Le SPEE paie dans son système</li>
-        <li><b>RECAP, trésorerie et reporting à jour</b></li>
+        <li>Les données sont transcrites : financement, RECAP, enquête sociale, état initial ; certificats et appels de fonds pré-remplis</li>
+        <li>Le SPEE décide et paie dans son système</li>
+        <li><b>Tableaux de bord, trésorerie et reporting à jour</b></li>
       </ol>
-      <p class="lead" style="max-width:100%;margin:0">La facture n'est saisie qu'une fois : les autres tableaux deviennent des vues de cette facture.</p>
+      <p class="lead" style="max-width:100%;margin:0">Un document n'est saisi qu'une fois : les tableaux deviennent des vues de ses données.</p>
       <a class="btn" target="_blank" href="../?vue=amo&onglet=documents&depot=facture"><i class="ph-light ph-arrow-square-in"></i>Basculer sur la démo</a>
     </div>
-    <div class="demo"><div class="frame"></div><div class="replaces">Dépôt d'une facture de solde : champs extraits par Marius IA (violet) et point d'attention (orange). La fenêtre défile : cliquez dedans pour parcourir les champs.</div></div>
+    <div class="demo"><div class="docsw" data-docsw>
+        <button data-c="facture" class="on"><i class="ph-light ph-receipt"></i>Facture</button>
+        <button data-c="pv"><i class="ph-light ph-clipboard-text"></i>PV de réception</button>
+        <button data-c="audit"><i class="ph-light ph-lightning"></i>Audit énergétique</button>
+        <button data-c="avis"><i class="ph-light ph-identification-card"></i>Avis d'impôt</button>
+        <button data-c="anah"><i class="ph-light ph-bank"></i>Courrier ANAH</button>
+      </div><div class="frame"></div><div class="replaces">Champs extraits par Marius IA (violet), contrôles validés (vert), points d'attention (orange). Cliquez dans le cadre pour faire défiler.</div></div>
   </div>
 </section>
 
