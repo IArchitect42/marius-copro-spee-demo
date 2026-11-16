@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { useFile } from "@dust/react-hooks";
 import SpeeView from "./SpeeReseau";
 import DepotIA, { DepotResult } from "./DepotIA";
-import { LIGHT_LOCKED, LightBanner, LockedTab, ParcoursQualiteLight } from "./LightAccess";
+import { LIGHT_LOCKED, LIGHT, LightBanner, LockedFeature, ParcoursQualiteLight } from "./LightAccess";
 import { CheckCircle2, Clock, AlertCircle, Send, FileText, Info, Banknote } from "lucide-react";
 
 // ─── COULEURS MARIUS EXACTES (depuis bootstrapmarius.min.css) ───
@@ -1864,6 +1864,7 @@ function DocumentsTab() {
 
 
       {/* ── Volet Signatures ── */}
+{LIGHT.on&&<div style={{margin:"16px 24px 0",background:"#E6F3FA",borderRadius:"4px",padding:"12px",display:"flex",gap:"12px",color:"#01537F",fontSize:"14px",lineHeight:"20px"}}><i className="ph-light ph-info" style={{fontSize:"24px"}}/><span>{docSubTab==='signatures'?<><b>Signature électronique via le parcours qualité.</b> Ce dossier est rattaché au parcours qualité du SPEE Hauts-de-France : les signatures sont fournies par ce parcours.</>:<><b>Compte Light : génération des documents non incluse.</b> Déposez les documents produits hors de Marius : Marius IA les lit, vérifie leur conformité et en extrait les données.</>}</span></div>}
       {docSubTab==='signatures'&&(<SignaturesTab/>)}
 
     </div>
@@ -5476,7 +5477,7 @@ function FinancementTab() {
     {id:"aides",             icon:"ph-hand-coins",    label:"Aides publiques"},
     {id:"cee",               icon:"ph-lightning",     label:"CEE"},
     {id:"prets",             icon:"ph-bank",          label:"Prêts collectifs"},
-    {id:"copropriétaires",   icon:"ph-users-three",   label:"Copropriétaires"},
+    {id:"copropriétaires",   icon:LIGHT.on?"ph-lock-simple":"ph-users-three",   label:"Copropriétaires"},
   ];
 
   // ── États Copropriétaires ──
@@ -6400,7 +6401,7 @@ function FinancementTab() {
       {ftab==="aides"             && <AidesView/>}
       {ftab==="cee"               && <CeeView/>}
       {ftab==="prets"             && <PrêtsView/>}
-      {ftab==="copropriétaires"   && <CopropriétairesView/>}
+      {ftab==="copropriétaires"   && (LIGHT.on ? <LockedFeature label="Plans de financement individuels" why="En Light, vous disposez du plan de financement global. Les plans individuels par copropriétaire (tantièmes, ressources, éco-PTZ) relèvent du compte AMO Full ou du SPEE dans le cadre du pacte."/> : <CopropriétairesView/>)}
     </div>
   );
 }
@@ -7498,7 +7499,7 @@ function LaCoprTab() {
 
   const SUBS: {id:LaCoprSub; icon:string; label:string}[] = [
     {id:"accueil", icon:"ph-identification-card", label:"Carte d'identité"},
-    {id:"enquete", icon:"ph-chats-circle",        label:"Enquête sociale"},
+    {id:"enquete", icon:LIGHT.on?"ph-lock-simple":"ph-chats-circle",        label:"Enquête sociale"},
     {id:"bic",     icon:"ph-clipboard-text",      label:"Bilan Initial de Copropriété"},
   ];
 
@@ -7525,7 +7526,7 @@ function LaCoprTab() {
       {/* Contenu */}
       <div style={{flex:1,overflowY:"auto",background:"#FBFBFB"}}>
         {sub==="accueil" && <AccueilView/>}
-        {sub==="enquete" && <EnqueteSocialeView/>}
+        {sub==="enquete" && (LIGHT.on ? <LockedFeature label="Enquête sociale"/> : <EnqueteSocialeView/>)}
         {sub==="bic"     && <BICView/>}
       </div>
     </div>
@@ -15004,6 +15005,7 @@ export default function MariusCopro() {
   );
 
 
+  LIGHT.on = viewMode==="light";
   if(viewMode==="light"){COPRO.nom="Résidence Les Tilleuls";COPRO.adresse="8 rue de l'Épeule, 59100 Roubaix";}else{COPRO.nom="La Résidence Vauban";COPRO.adresse="24 rue Gambetta, 59000 Lille";}
   if(viewMode==="spee") return <SpeeView onSwitch={(m)=>setViewMode(m as ViewMode)} profiles={[
     {mode:"spee",ini:"HDF",bg:"#13252D",label:"SPEE Hauts-de-France",sub:"Compte réseau · Pôle copropriétés"},
@@ -16257,14 +16259,13 @@ export default function MariusCopro() {
         {amoPage==="detail"&&amoSection==="mission"&&<div style={{flex:1,overflowY:"auto",background:"#FBFBFB"}}>
           {viewMode==="light"&&<LightBanner/>}
           {tab==="qualite"&&<ParcoursQualiteLight/>}
-          {viewMode==="light"&&LIGHT_LOCKED.includes(tab)&&<LockedTab label={TABS.find(x=>x.id===tab)?.label||""}/>}
-          {viewMode!=="light"&&tab==="suivifin"&&<SuiviFinancierTab/>}
+          {tab==="suivifin"&&<SuiviFinancierTab/>}
           {tab==="messagerie"&&<MessagerieTab/>}
-          {viewMode!=="light"&&tab==="newsletter"&&<NewsletterTab/>}
+          {tab==="newsletter"&&<NewsletterTab/>}
           {tab==="lacopro"&&<LaCoprTab/>}
           {tab==="projet"&&<ProjetTab/>}
           {tab==="mission"&&<MissionTab/>}
-          {viewMode!=="light"&&tab==="financement"&&<FinancementTab/>}
+          {tab==="financement"&&<FinancementTab/>}
           {tab==="documents"&&<DocumentsTab/>}
           {tab==="historique"&&<HistoriqueTab/>}
           {tab==="intervenants"&&<IntervenantsTab/>}

@@ -3,55 +3,66 @@
 import React, { useState } from "react";
 import { T, txt, Icon, Button, Tag, BlockWrapper, AlertBlock, th, td } from "./ds";
 
-export const LIGHT_LOCKED = ["financement", "suivifin", "newsletter"];
+// Grille de Simon (Tarifs Marius Copropriété) : le Light sert à transmettre et vérifier des dossiers déjà constitués.
+// Light : pas de génération des documents, pas d'enquête sociale, pas de plans de financement individuels ; signature via le parcours qualité.
+export const LIGHT_LOCKED: string[] = [];
+export const LIGHT = { on: false };
 
-const FEATURES: { f: string; light: boolean; note?: string }[] = [
-  { f: "Fiche copropriété, Bilan initial, enquête sociale", light: true },
-  { f: "Mission, jalons, documents, signatures, historique", light: true },
-  { f: "Intervenants et messagerie", light: true },
-  { f: "Parcours qualité Hauts-de-France et remontée au SPEE", light: true },
-  { f: "Marius IA : lecture des documents déposés", light: true },
-  { f: "Plan de financement global et individuel", light: false, note: "porté par le SPEE ou un compte Full" },
-  { f: "Suivi financier : factures, certificats, appels de fonds, versements", light: false },
-  { f: "Trésorerie et pilotage financier du projet", light: false },
-  { f: "Newsletter aux copropriétaires", light: false },
+type Cell = "oui" | "non" | "pq";
+const FEATURES: { f: string; reseau: Cell; light: Cell; full: Cell }[] = [
+  { f: "Carte d'identité de la copropriété (registre national)", reseau: "oui", light: "oui", full: "oui" },
+  { f: "Dépôt de documents et de données, état d'avancement", reseau: "oui", light: "oui", full: "oui" },
+  { f: "Workflow du dossier : étapes, jalons, notes, notifications", reseau: "oui", light: "oui", full: "oui" },
+  { f: "Traçabilité horodatée", reseau: "oui", light: "oui", full: "oui" },
+  { f: "Import des copropriétaires et invitations", reseau: "non", light: "oui", full: "oui" },
+  { f: "Plan de financement global", reseau: "oui", light: "oui", full: "oui" },
+  { f: "Bilan initial de la copropriété", reseau: "non", light: "oui", full: "oui" },
+  { f: "Messagerie", reseau: "oui", light: "oui", full: "oui" },
+  { f: "Marius IA : assistant, conformité, extraction", reseau: "oui", light: "oui", full: "oui" },
+  { f: "Signature électronique", reseau: "pq", light: "pq", full: "oui" },
+  { f: "Plans de financement individuels", reseau: "non", light: "non", full: "oui" },
+  { f: "Enquête sociale", reseau: "non", light: "non", full: "oui" },
+  { f: "Génération des documents du dossier", reseau: "non", light: "non", full: "oui" },
 ];
+const cell = (c: Cell) => c === "oui" ? <Icon n="check-circle" size={20} color={T.g500} /> : c === "pq" ? <Tag label="Via le parcours qualité" status="Info" /> : <Icon n="lock-simple" size={20} color={T.n700} />;
 
-export function LightBanner() {
-  return (
-    <div style={{ background: T.b50, borderBottom: `1px solid ${T.b200}`, padding: "8px 24px", display: "flex", alignItems: "center", gap: 12 }}>
-      <Icon n="info" size={16} color={T.b500} />
-      <span style={{ ...txt.bodyS, color: T.b500, flex: 1 }}>
-        <b>Compte AMO Light Équipe · Urbanis.</b> Dossier sous pacte avec le SPEE Hauts-de-France : le parcours qualité est activé, vos jalons et pièces remontent au SPEE. Le pilotage financier est porté par un compte Full.
-      </span>
-      <Tag label="Light" status="Light" size="Medium" />
-    </div>
-  );
-}
-
-export function LockedTab({ label }: { label: string }) {
+export function LockedFeature({ label, why }: { label: string; why?: string }) {
   return (
     <div style={{ padding: 32, maxWidth: 880, margin: "0 auto", display: "flex", flexDirection: "column", gap: 32 }}>
-      <AlertBlock type="Neutral" size="Medium" title={`${label} : non inclus dans le compte Light`}>
-        Dans un dossier sous pacte, le plan de financement, les factures, les appels de fonds et la trésorerie sont pilotés par le SPEE (compte Full et compte réseau). Vous voyez les jalons et les documents, sans gérer les flux financiers.
+      <AlertBlock type="Neutral" size="Medium" title={`${label} : réservé au compte AMO Full`}>
+        {why || "Le compte Light sert à transmettre et vérifier un dossier déjà constitué. Cette fonctionnalité fait partie de la constitution complète du dossier, incluse dans le compte AMO Full."}
       </AlertBlock>
       <Comparatif />
     </div>
   );
 }
 
+export function LightBanner() {
+  return (
+    <div style={{ background: T.b50, borderBottom: `1px solid ${T.b200}`, padding: "8px 24px", display: "flex", alignItems: "center", gap: 12 }}>
+      <Icon n="info" size={16} color={T.b500} />
+      <span style={{ ...txt.bodyS, color: T.b500, flex: 1 }}>
+        <b>Compte AMO Light Équipe · Urbanis.</b> Transmission et vérification d'un dossier sous pacte avec le SPEE Hauts-de-France : parcours qualité rattaché, signature électronique fournie par ce parcours. Non inclus : génération des documents, enquête sociale, plans de financement individuels.
+      </span>
+      <Tag label="Light" status="Light" size="Medium" />
+    </div>
+  );
+}
+
 export function Comparatif() {
   return (
-    <BlockWrapper title="Votre accès comparé à un AMO Full" icon="scales">
+    <BlockWrapper title="Ce que chaque compte débloque" icon="scales">
       <table style={{ width: "100%", borderCollapse: "collapse" }}>
-        <thead><tr><th style={th}>Fonctionnalité</th><th style={{ ...th, textAlign: "center" }}>Light (votre compte)</th><th style={{ ...th, textAlign: "center" }}>Full</th></tr></thead>
+        <thead><tr><th style={th}>Fonctionnalité</th><th style={{ ...th, textAlign: "center" }}>Réseau</th><th style={{ ...th, textAlign: "center", background: T.b50 }}>AMO Light (vous)</th><th style={{ ...th, textAlign: "center" }}>AMO Full</th></tr></thead>
         <tbody>{FEATURES.map(x => (
           <tr key={x.f}>
-            <td style={td}>{x.f}{x.note && <div style={txt.bodyXS}>{x.note}</div>}</td>
-            <td style={{ ...td, textAlign: "center" }}>{x.light ? <Icon n="check-circle" size={20} color={T.g500} /> : <Icon n="lock-simple" size={20} color={T.n700} />}</td>
-            <td style={{ ...td, textAlign: "center" }}><Icon n="check-circle" size={20} color={T.g500} /></td>
+            <td style={td}>{x.f}</td>
+            <td style={{ ...td, textAlign: "center" }}>{cell(x.reseau)}</td>
+            <td style={{ ...td, textAlign: "center", background: T.b50 }}>{cell(x.light)}</td>
+            <td style={{ ...td, textAlign: "center" }}>{cell(x.full)}</td>
           </tr>))}</tbody>
       </table>
+      <span style={txt.bodyXS}>Source : grille Tarifs Marius Copropriété. Les invités du dossier (syndic, copropriétaires, artisans) accèdent aux fonctionnalités de l'offre de l'AMO qui les invite.</span>
     </BlockWrapper>
   );
 }
