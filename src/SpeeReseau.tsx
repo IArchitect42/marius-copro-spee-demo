@@ -3,6 +3,7 @@
 // Données fictives de démonstration.
 import React, { useEffect, useMemo, useState } from "react";
 import CreerCopro from "./CreerCopro";
+import { DEMANDES_INIT, DemandesListe, DemandeFiche, Demande } from "./DemandeFiche";
 import { T, F, txt, fmtE, Icon, Button, Tag, BlockWrapper, KeyValue, AlertBlock, Segmented, TabMenu, Input, Select, Checkbox, th, td, Progress, MenuEntry, downloadCSV, TagStatus } from "./ds";
 
 type Page = "nouvelle" | "portefeuille" | "recap" | "qualification" | "financement" | "tresorerie" | "operateurs" | "reporting" | "coconstruction";
@@ -94,7 +95,7 @@ export default function SpeeView({ profiles, onSwitch }: { profiles: Profile[]; 
           {page === "portefeuille" && <Portefeuille go={go} onOpenVauban={() => onSwitch("amo")} onOpenLight={() => onSwitch("light")} />}
           {page === "nouvelle" && <CreerCopro />}
           {page === "recap" && <Recap coproId={selCopro} setCopro={setSelCopro} />}
-          {page === "qualification" && <Qualification />}
+          {page === "qualification" && <Qualification go={go} />}
           {page === "financement" && <Financement />}
           {page === "tresorerie" && <Tresorerie />}
           {page === "operateurs" && <Operateurs />}
@@ -250,75 +251,25 @@ export function Recap({ coproId, setCopro }: { coproId: string; setCopro: (id: s
   </>);
 }
 
-// ── 3. Qualification & commission ────────────────────────────────────
-type Crit = { id: string; label: string; famille: "Gestion" | "Technique" | "Projet"; poids: number };
-const CRITS_INIT: Crit[] = [
-  { id: "impayes", label: "Taux d'impayés maîtrisé", famille: "Gestion", poids: 3 },
-  { id: "syndic", label: "Syndic mobilisé", famille: "Gestion", poids: 2 },
-  { id: "fonds", label: "Fonds travaux alimenté", famille: "Gestion", poids: 1 },
-  { id: "dpe", label: "Étiquette E, F ou G", famille: "Technique", poids: 3 },
-  { id: "audit", label: "Audit ou DTG disponible", famille: "Technique", poids: 2 },
-  { id: "cs", label: "Conseil syndical moteur", famille: "Projet", poids: 3 },
-  { id: "ag", label: "Projet inscrit en AG", famille: "Projet", poids: 2 },
-];
-type Demande = { id: string; nom: string; ville: string; lots: number; origine: string; recue: string; notes: Record<string, number>; decision: string; orientation: string; co: string };
-const DEM_INIT: Demande[] = [
-  { id: "D1", nom: "Résidence Les Bleuets", ville: "Roubaix", lots: 24, origine: "Formulaire en ligne", recue: "04/11", notes: { impayes: 2, syndic: 3, fonds: 1, dpe: 3, audit: 0, cs: 3, ag: 1 }, decision: "À présenter", orientation: "—", co: "—" },
-  { id: "D2", nom: "Le Clos Saint-Pierre", ville: "Amiens", lots: 46, origine: "Syndic", recue: "06/11", notes: { impayes: 1, syndic: 2, fonds: 2, dpe: 3, audit: 3, cs: 2, ag: 2 }, decision: "À présenter", orientation: "—", co: "—" },
-  { id: "D3", nom: "Résidence du Port", ville: "Dunkerque", lots: 62, origine: "Ville de Dunkerque", recue: "07/11", notes: { impayes: 3, syndic: 1, fonds: 0, dpe: 2, audit: 1, cs: 1, ag: 0 }, decision: "À présenter", orientation: "—", co: "—" },
-  { id: "D4", nom: "Les Terrasses d'Arras", ville: "Arras", lots: 18, origine: "Prescripteur France Rénov'", recue: "10/11", notes: { impayes: 3, syndic: 3, fonds: 2, dpe: 3, audit: 2, cs: 3, ag: 3 }, decision: "Retenue", orientation: "SPEE (MOD directe)", co: "Inès B." },
-  { id: "D5", nom: "Résidence Foch", ville: "Beauvais", lots: 32, origine: "Formulaire en ligne", recue: "12/11", notes: { impayes: 1, syndic: 1, fonds: 0, dpe: 1, audit: 0, cs: 1, ag: 0 }, decision: "À présenter", orientation: "—", co: "—" },
-];
-export function Qualification() {
-  const [crits, setCrits] = useState(CRITS_INIT); const [dems, setDems] = useState(DEM_INIT); const [sel, setSel] = useState("D1"); const [param, setParam] = useState(false);
-  const max = crits.reduce((a, c) => a + c.poids * 3, 0);
-  const score = (d: Demande) => Math.round(crits.reduce((a, c) => a + (d.notes[c.id] || 0) * c.poids, 0) / max * 100);
-  const d = dems.find(x => x.id === sel)!;
-  const upd = (p: Partial<Demande>) => setDems(ds => ds.map(x => x.id === sel ? { ...x, ...p } : x));
-  const tone = (s: number): TagStatus => s >= 70 ? "Success" : s >= 45 ? "Warning" : "Error";
+// ── 3. Qualification : demandes entrantes et fiche de demande (DemandeFiche.tsx) ──
+let DEMANDES_STORE: Demande[] = DEMANDES_INIT.map(d => ({ ...d }));
+export function Qualification({ go }: { go?: (p: Page, c?: string) => void }) {
+  const [demandes, setDemandes] = useState<Demande[]>(DEMANDES_STORE);
+  const [open, setOpen] = useState<string | null>(() => new URLSearchParams(window.location.search).get("demande"));
+  useEffect(() => { DEMANDES_STORE = demandes; }, [demandes]);
+  const d = demandes.find(x => x.id === open);
+  if (d) return <DemandeFiche d={d} onBack={() => setOpen(null)} onDecide={p => {
+    setDemandes(ds => ds.map(x => x.id === d.id ? { ...x, decision: p.decision, orientation: p.orientation, co: p.co } : x));
+    if (p.decision.startsWith("Projet") && !COPROS.some(c => c.id === "N-" + d.id)) {
+      const [, ville] = /\d{5} (.+)$/.exec(d.adresse) || [, "Lille"];
+      COPROS.unshift({ id: "N-" + d.id, nom: d.nom, ville: ville as string, terr: "MEL", lots: p.lots || 0, mode: p.mode, operateur: p.mode === "Full" ? "SPEE (MOD directe)" : p.orientation, co: p.mode === "Full" ? p.co : "—",
+        phase: 0, avTravaux: 0, avHono: 0, budget: 0, rac: 0, dpe: "—", alerte: "Nouveau projet issu d'une demande" });
+    }
+  }} />;
   return (<>
-    <PageTitle title="Qualification & commission" sub="Entrée dans le parcours : priorisation opérationnelle (ce n'est pas un scoring bancaire)"
-      demande="Remplacer le fichier SCORING QUALIFICATION et le tableau des commissions : qualifier les contacts (gestion, technique, projet), décider en commission, affecter au bon chargé d'opération ou orienter vers un opérateur." />
-    <div style={{ display: "grid", gridTemplateColumns: "1.1fr 1fr", gap: 32, alignItems: "start" }}>
-      <BlockWrapper title="Demandes entrantes" icon="files">
-        <table style={{ width: "100%", borderCollapse: "collapse" }}>
-          <thead><tr>{["Copropriété", "Origine", "Score", "Commission"].map(h => <th key={h} style={th}>{h}</th>)}</tr></thead>
-          <tbody>{dems.map(x => { const s = score(x); return (
-            <tr key={x.id} onClick={() => setSel(x.id)} style={{ cursor: "pointer", background: x.id === sel ? T.b50 : T.white }}>
-              <td style={td}><div style={{ fontWeight: 700 }}>{x.nom}</div><div style={txt.bodyXS}>{x.ville} · {x.lots} lots · reçue le {x.recue}</div></td>
-              <td style={td}><span style={txt.bodyS}>{x.origine}</span></td>
-              <td style={td}><Tag label={`${s} / 100`} status={tone(s)} size="Medium" /></td>
-              <td style={td}><Tag label={x.decision} status={x.decision === "Retenue" ? "Success" : x.decision === "Ajournée" ? "Warning" : x.decision === "Orientée opérateur" ? "Info" : "Grey"} /></td>
-            </tr>); })}</tbody>
-        </table>
-      </BlockWrapper>
-      <div style={{ display: "flex", flexDirection: "column", gap: 32 }}>
-        <BlockWrapper type="Edit" title={d.nom} icon="clipboard-text" right={<Tag label={`Score ${score(d)} / 100`} status={tone(score(d))} size="Medium" />}
-          footerRight={<><Button aspect="Outline" label="Ajourner" onClick={() => upd({ decision: "Ajournée" })} /><Button aspect="Plain" label="Valider la décision" icon="check" onClick={() => upd({ decision: d.orientation === "SPEE (MOD directe)" ? "Retenue" : d.orientation !== "—" ? "Orientée opérateur" : "Retenue" })} /></>}>
-          {(["Gestion", "Technique", "Projet"] as const).map(f => (
-            <div key={f} style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-              <div style={{ ...txt.bodySB }}>{f}</div>
-              {crits.filter(c => c.famille === f).map(c => (
-                <div key={c.id} style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                  <span style={{ ...txt.bodyS, flex: 1 }}>{c.label} <span style={txt.bodyXS}>(× {c.poids})</span></span>
-                  <Segmented value={String(d.notes[c.id] || 0)} onChange={v => upd({ notes: { ...d.notes, [c.id]: Number(v) } })} options={["0", "1", "2", "3"].map(v => ({ v, label: v }))} />
-                </div>))}
-            </div>))}
-          <div style={{ display: "flex", gap: 12 }}>
-            <Select label="Orientation" value={d.orientation} onChange={v => upd({ orientation: v })} width="50%" options={["—", "SPEE (MOD directe)", "Urbanis", "SOLIHA"].map(v => ({ v, label: v }))} />
-            <Select label="Chargé d'opération" value={d.co} onChange={v => upd({ co: v })} width="50%" options={["—", ...COS].map(v => ({ v, label: v }))} />
-          </div>
-        </BlockWrapper>
-        <BlockWrapper title="Grille de qualification" icon="sliders" right={<Button size="Tiny" aspect="Outline" icon="pencil-simple" label={param ? "Fermer" : "Paramétrer"} onClick={() => setParam(!param)} />}>
-          {!param ? <span style={txt.bodyS}>{crits.length} critères, pondérés. La grille est paramétrable par le SPEE : les scores se recalculent immédiatement.</span> :
-            crits.map(c => (
-              <div key={c.id} style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                <span style={{ ...txt.bodyS, flex: 1 }}>{c.famille} · {c.label}</span>
-                <Segmented value={String(c.poids)} onChange={v => setCrits(cs => cs.map(x => x.id === c.id ? { ...x, poids: Number(v) } : x))} options={["1", "2", "3"].map(v => ({ v, label: `× ${v}` }))} />
-              </div>))}
-        </BlockWrapper>
-      </div>
-    </div>
+    <PageTitle title="Qualification des demandes" sub="Chaque demande vient d'un formulaire rempli par un syndicat de copropriétaires ou un syndic. Ouvrez la fiche pour la qualifier et créer le projet."
+      demande="Remplacer le fichier SCORING QUALIFICATION et le tableau des commissions : qualifier les contacts (gestion, technique, projet), décider en commission, garder le projet au SPEE ou l'orienter vers un opérateur." />
+    <DemandesListe demandes={demandes} onOpen={setOpen} />
   </>);
 }
 
