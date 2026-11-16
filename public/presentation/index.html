@@ -1,0 +1,336 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Marius Copro × SPEE Hauts-de-France</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Montserrat:wght@500;600;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/light/style.css" />
+<style>
+/* Couleurs, typo et rayons repris de THE DAM (skill ds-marius) */
+:root{--n50:#FBFBFB;--n100:#F2F3F4;--n200:#ECEEEE;--n300:#E4E6E7;--n500:#D6D9DB;--n600:#C3C5C7;--n800:#767778;
+--p50:#EAEEF0;--p100:#BECCD1;--p300:#73909C;--p500:#2E596B;--p600:#2A5161;--p700:#213F4C;--p900:#13252D;--s500:#84BF40;--s50:#F3F9EC;
+--g50:#EBF4EC;--g500:#225725;--o50:#FEF2E6;--o500:#954C00;--b50:#E6F3FA;--b500:#01537F;--ai50:#F7E6FF;--ai500:#6A009C}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:var(--p900);font-family:Inter,sans-serif;color:var(--p900)}
+.deck{position:fixed;inset:0;display:flex;align-items:center;justify-content:center}
+.slide{display:none;width:min(100vw,177.78vh);height:min(56.25vw,100vh);background:#fff;position:relative;overflow:hidden;padding:4.2% 5% 6%;flex-direction:column;gap:2.2%}
+.slide.active{display:flex}
+.slide.dark{background:var(--p900);color:var(--n50)}
+h1{font-family:Montserrat,sans-serif;font-weight:700;font-size:clamp(28px,4.4vh,56px);line-height:1.15;margin:0}
+h2{font-family:Montserrat,sans-serif;font-weight:700;font-size:clamp(22px,4vh,44px);line-height:1.2;margin:0}
+h3{font-family:Montserrat,sans-serif;font-weight:600;font-size:clamp(15px,2.3vh,24px);margin:0}
+p,li{font-size:clamp(14px,2.2vh,22px);line-height:1.45}
+ul{margin:0;padding-left:1.2em}
+.kicker{font-family:Montserrat,sans-serif;font-weight:600;font-size:clamp(11px,1.6vh,16px);color:var(--p300);text-transform:uppercase;letter-spacing:.06em}
+.dark .kicker{color:var(--s500)}
+.lead{font-size:clamp(15px,2.6vh,26px);color:var(--p600);max-width:80%}
+.dark .lead{color:var(--p100)}
+.grid{display:grid;gap:2vh;flex:1;min-height:0}
+.g2{grid-template-columns:1fr 1fr}.g3{grid-template-columns:repeat(3,1fr)}.g4{grid-template-columns:repeat(4,1fr)}
+.split{display:grid;grid-template-columns:.9fr 1.4fr;gap:2.5vh;flex:1;min-height:0}
+.block{background:var(--n50);border:1px solid var(--n600);border-radius:8px;padding:2vh;display:flex;flex-direction:column;gap:1vh}
+.block h3{display:flex;align-items:center;gap:.5em}
+.block i{color:var(--p500);font-size:1.3em}
+.quote{background:var(--n200);border-radius:4px;padding:1.4vh 1.8vh;font-size:clamp(13px,2vh,20px);line-height:1.4}
+.quote b{font-family:Montserrat,sans-serif;font-weight:600;color:var(--p500);font-size:.8em;display:block;margin-bottom:.3em}
+.tag{display:inline-flex;align-items:center;gap:6px;height:24px;padding:0 12px;border-radius:12px;font-size:12px;font-weight:500;background:var(--p50);color:var(--p500);white-space:nowrap}
+.tag.dark{background:var(--p900);color:var(--n50)}.tag.ok{background:var(--g50);color:var(--g500)}.tag.warn{background:var(--o50);color:var(--o500)}.tag.ai{background:var(--ai50);color:var(--ai500)}
+.btn{display:inline-flex;align-items:center;gap:8px;height:40px;padding:0 16px;border-radius:4px;background:var(--p500);color:var(--n50);font-family:Montserrat,sans-serif;font-weight:700;font-size:16px;text-decoration:none;border:1px solid var(--p500);cursor:pointer}
+.btn:hover{background:var(--p700)}
+.btn.outline{background:#fff;color:var(--p500)}.btn.outline:hover{background:var(--p50)}
+.btn.small{height:32px;font-size:14px;font-weight:600;padding:0 12px}
+.dark .btn.outline{background:transparent;color:var(--n50);border-color:var(--n50)}
+.demo{display:flex;flex-direction:column;gap:1vh;min-height:0}
+.frame{flex:1;min-height:0;border:1px solid var(--n600);border-radius:8px;overflow:hidden;position:relative;background:var(--n100)}
+.frame iframe{position:absolute;top:0;left:0;width:200%;height:200%;transform:scale(.5);transform-origin:0 0;border:0;background:#fff}
+.frame .ph{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:var(--n800);font-size:14px}
+.answers{display:flex;flex-direction:column;gap:1vh}
+.answers li{margin-bottom:.4vh}
+.replaces{font-size:clamp(12px,1.8vh,17px);color:var(--n800)}
+.q{background:var(--b50);color:var(--b500);border-radius:4px;padding:1.2vh 1.6vh;font-size:clamp(13px,1.9vh,19px);display:flex;gap:.6em;align-items:flex-start}
+table{border-collapse:collapse;width:100%;font-size:clamp(12px,1.9vh,19px)}
+th{text-align:left;background:var(--n100);color:var(--n800);font-weight:600;padding:1vh 1.4vh;border-bottom:1px solid var(--n300)}
+td{padding:1vh 1.4vh;border-bottom:1px solid var(--n300)}
+.foot{position:absolute;left:5%;right:5%;bottom:2.2%;display:flex;align-items:center;justify-content:space-between;font-size:12px;color:var(--n800)}
+.dark .foot{color:var(--p300)}
+.foot img{height:22px}
+.progress{position:absolute;left:0;bottom:0;height:4px;background:var(--s500);transition:width .2s}
+.nav{position:fixed;right:16px;bottom:14px;display:flex;gap:8px;z-index:10;opacity:.25;transition:opacity .2s}
+.nav:hover{opacity:1}
+.nav button{width:36px;height:36px;border-radius:4px;border:1px solid var(--n600);background:#fff;color:var(--p500);cursor:pointer;font-size:18px}
+.notes{display:none;position:fixed;left:16px;bottom:60px;width:min(520px,40vw);max-height:50vh;overflow:auto;background:#fff;border:1px solid var(--n600);border-radius:8px;padding:14px 16px;z-index:20;box-shadow:0 1px 3px rgba(0,0,0,.25);font-size:14px;line-height:1.45}
+.notes.on{display:block}
+.notes h4{margin:0 0 6px;font-family:Montserrat,sans-serif;font-size:14px;color:var(--p500)}
+.flow{display:flex;align-items:center;gap:1.2vh;flex-wrap:wrap}
+.flow .step{background:var(--p50);border-radius:8px;padding:1.4vh 1.8vh;font-weight:600;font-size:clamp(13px,2vh,20px)}
+.flow i{color:var(--p300)}
+.big{font-family:Montserrat,sans-serif;font-weight:700;font-size:clamp(28px,6vh,64px);color:var(--p500)}
+.role{display:flex;gap:1.2vh;align-items:flex-start}
+.role .av{width:5vh;height:5vh;min-width:36px;min-height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:clamp(11px,1.6vh,15px);flex-shrink:0}
+.role b{font-family:Montserrat,sans-serif;font-size:clamp(13px,2vh,19px)}
+.role span{display:block;font-size:clamp(12px,1.75vh,17px);color:var(--n800);line-height:1.35;margin-top:2px}
+</style>
+</head>
+<body>
+<div class="deck" id="deck">
+
+<!-- 1 -->
+<section class="slide dark" data-notes="Annoncer : maquette de travail, données fictives. Objectif : montrer, écouter, prioriser.">
+  <div style="flex:1;display:flex;flex-direction:column;justify-content:center;gap:3vh">
+    <img src="../assets/logo-name.svg" alt="Marius" style="height:7vh;align-self:flex-start;background:#fff;border-radius:8px;padding:1vh 1.5vh" />
+    <div class="kicker">Pôle copropriétés · 16 novembre 2026</div>
+    <h1 style="font-size:clamp(34px,7vh,80px)">Marius Copro<br/>× SPEE Hauts-de-France</h1>
+    <p class="lead">Votre espace, vos dossiers, et ce que nous construisons ensemble.</p>
+  </div>
+</section>
+
+<!-- 2 -->
+<section class="slide" data-notes="Rappeler la démo de septembre (« beaucoup d'infos ») : aujourd'hui on part de vos demandes.">
+  <div class="kicker">Où en sommes-nous</div>
+  <h2>Un chemin parcouru ensemble</h2>
+  <div class="flow" style="margin-top:2vh">
+    <div class="step">Juin · note de cadrage</div><i class="ph-light ph-arrow-right"></i>
+    <div class="step">Juillet · vos outils de suivi</div><i class="ph-light ph-arrow-right"></i>
+    <div class="step">Sept.-oct. · analyse restituée</div><i class="ph-light ph-arrow-right"></i>
+    <div class="step" style="background:var(--p500);color:#fff">Aujourd'hui · démo et atelier</div>
+  </div>
+  <div class="grid g3" style="margin-top:3vh;flex:0">
+    <div class="block"><h3><i class="ph-light ph-eye"></i>Montrer</h3><p style="margin:0">Votre espace SPEE et un dossier de bout en bout.</p></div>
+    <div class="block"><h3><i class="ph-light ph-chats-circle"></i>Écouter</h3><p style="margin:0">Vos réactions, vos cas réels, ce qui manque.</p></div>
+    <div class="block"><h3><i class="ph-light ph-list-checks"></i>Prioriser</h3><p style="margin:0">Ensemble, ce qu'on construit en premier.</p></div>
+  </div>
+</section>
+
+<!-- 3 -->
+<section class="slide" data-notes="Lire 2 ou 3 citations à voix haute. Message : votre méthode existe déjà, elle est éclatée entre plusieurs fichiers.">
+  <div class="kicker">Ce que vous nous avez dit</div>
+  <h2>Vos demandes, vos mots</h2>
+  <div class="grid g3">
+    <div class="quote"><b>Outils de suivi</b>« Permettre un croisement des informations pour optimiser les outils, sécuriser, permettre un dépôt de pièces. »</div>
+    <div class="quote"><b>Suivi de facturation</b>« Un tableau RECAP en chapeau pour suivre l'avancement en pourcentage global et par lot, pour les travaux et tous les honoraires. »</div>
+    <div class="quote"><b>Plan de financement</b>« Des calculs automatiques sur certains postes, par exemple l'éco-PTZ. »</div>
+    <div class="quote"><b>Aides locales</b>« Les calculs complémentaires pourront-ils être intégrés pour que le calcul se fasse automatiquement ? »</div>
+    <div class="quote"><b>Pilotage</b>« Une vision agrégée de plusieurs copropriétés », « des filtres et des extractions ».</div>
+    <div class="quote"><b>Analyse financière</b>« Le suivi de la réception des pièces justificatives et le résultat de l'analyse par le CO. »</div>
+  </div>
+</section>
+
+<!-- 4 -->
+<section class="slide" data-notes="La donnée est saisie une fois, puis affichée sous plusieurs vues. Ligne de partage : Marius structure, coordonne, trace et consolide ; le SPEE décide, contrôle, comptabilise et paie.">
+  <div class="kicker">Le principe</div>
+  <h2>De vos fichiers à une seule fiche</h2>
+  <table style="margin-top:1vh">
+    <tr><th>Aujourd'hui</th><th>Dans Marius</th><th>Écran de la démo</th></tr>
+    <tr><td>BDD SUIVI COPRO</td><td>Portefeuille de toutes les copros</td><td><span class="tag">SPEE · Portefeuille</span></td></tr>
+    <tr><td>BDD PROJET, OneNote</td><td>Fiche copropriété, mission, documents, historique</td><td><span class="tag">Dossier Vauban</span></td></tr>
+    <tr><td>SCORING QUALIFICATION, commissions</td><td>Qualification paramétrable et décision</td><td><span class="tag">SPEE · Qualification</span></td></tr>
+    <tr><td>SUIVI FACTURATION (onglet RECAP)</td><td>RECAP par lot, appels de fonds, versements</td><td><span class="tag">SPEE · RECAP</span></td></tr>
+    <tr><td>ANALYSE FINANCIÈRE, quotes-parts</td><td>Plans individuels, éco-PTZ, pièces et analyse</td><td><span class="tag">SPEE · Financement</span></td></tr>
+  </table>
+  <div class="q" style="margin-top:auto"><i class="ph-light ph-scales"></i><span><b>Marius structure, coordonne, trace et consolide.</b> Le SPEE décide, contrôle, comptabilise et paie.</span></div>
+</section>
+
+<!-- 5 -->
+<section class="slide" data-demo="../?vue=spee&page=portefeuille" data-notes="Démo : filtrer par territoire, puis par « Sous pacte », cocher « Avec alerte », lancer « Extraire (CSV) ». ❓ Quels filtres utilisez-vous tous les jours ? Quelles colonnes manquent ?">
+  <div class="kicker">1 · Votre espace SPEE</div>
+  <div class="split">
+    <div class="answers">
+      <h2>Le portefeuille</h2>
+      <ul><li>Les 80 copros, MOD directe et sous pacte</li><li>Avancement des travaux et des honoraires</li><li>Filtres, recherche, alertes</li><li>Extraction en un clic</li></ul>
+      <div class="replaces">Remplace : BDD SUIVI COPRO</div>
+      <div class="q"><i class="ph-light ph-question"></i>Quels filtres utilisez-vous tous les jours ? Quelles colonnes manquent ?</div>
+      <a class="btn" target="_blank" href="../?vue=spee&page=portefeuille"><i class="ph-light ph-arrow-square-in"></i>Basculer sur la démo</a>
+    </div>
+    <div class="demo"><div class="frame"></div></div>
+  </div>
+</section>
+
+<!-- 6 -->
+<section class="slide" data-demo="../?vue=amo&onglet=lacopro" data-notes="Depuis le portefeuille : Résidence Vauban › Ouvrir le dossier. Montrer La Copro (Bilan initial, Enquête sociale), Mission (6 phases), Documents et Historique (signature Yousign), Messagerie.">
+  <div class="kicker">2 · Un dossier vu de l'intérieur</div>
+  <div class="split">
+    <div class="answers">
+      <h2>La Résidence Vauban</h2>
+      <ul><li><b>La Copro</b> : identité, Bilan initial, enquête sociale</li><li><b>Mission</b> : le parcours en 6 phases</li><li><b>Documents, Historique</b> : pièces, signatures horodatées</li><li><b>Messagerie</b> : tous les échanges au même endroit</li></ul>
+      <div class="replaces">Remplace : BDD PROJET, OneNote, échanges dispersés</div>
+      <a class="btn" target="_blank" href="../?vue=amo&onglet=lacopro"><i class="ph-light ph-arrow-square-in"></i>Basculer sur la démo</a>
+    </div>
+    <div class="demo"><div class="frame"></div></div>
+  </div>
+</section>
+
+<!-- 7 -->
+<section class="slide" data-notes="Démo : menu en bas à gauche, changer de profil sur la même copro. ❓ Qui, chez vous et chez vos partenaires, devrait avoir un accès ? Lequel en priorité ?">
+  <div class="kicker">3 · Chaque acteur, son accès</div>
+  <h2>Le même dossier, des vues adaptées</h2>
+  <div class="grid g4" style="flex:0">
+    <div class="block role"><div class="av" style="background:#13252D">HDF</div><div><b>SPEE</b><span>Portefeuille, qualification, financement, reporting</span></div></div>
+    <div class="block role"><div class="av" style="background:#2E596B">AMO</div><div><b>Chargé d'opération</b><span>Pilote le dossier de bout en bout</span></div></div>
+    <div class="block role"><div class="av" style="background:#587A89">SY</div><div><b>Syndic</b><span>AG, appels de fonds, factures à valider</span></div></div>
+    <div class="block role"><div class="av" style="background:#388E3C">CS</div><div><b>Conseil syndical</b><span>Prochaine AG, convocations, votes</span></div></div>
+    <div class="block role"><div class="av" style="background:#AC5700">CP</div><div><b>Copropriétaire</b><span>Son financement, l'actualité du projet</span></div></div>
+    <div class="block role"><div class="av" style="background:#7A00B3">MOE</div><div><b>Maître d'œuvre</b><span>APS, APD, DCE, ordres de service, PV</span></div></div>
+    <div class="block role"><div class="av" style="background:#F57C00">FI</div><div><b>Financeur</b><span>Produits, demandes, risque, versements</span></div></div>
+    <div class="block role"><div class="av" style="background:#73909C">OP</div><div><b>Opérateurs sous pacte</b><span>Leur espace, données remontées au SPEE</span></div></div>
+  </div>
+  <div class="q" style="margin-top:auto"><i class="ph-light ph-question"></i>Qui, chez vous et chez vos partenaires, devrait avoir un accès ? Lequel en priorité ?</div>
+  <div><a class="btn" target="_blank" href="../?vue=syndic"><i class="ph-light ph-arrow-square-in"></i>Basculer sur la démo (syndic)</a></div>
+</section>
+
+<!-- 8 -->
+<section class="slide" data-demo="../?vue=spee&page=financement" data-notes="Démo : changer le montant d'aide locale (ménage très modeste) et voir le calcul bouger ; décocher « Financer ? » ; saisir un montant d'éco-PTZ à la main (signalé « Saisie manuelle »). Puis vue AMO › Financement. ❓ Vos aides locales les plus fréquentes ? Les cas d'exception ?">
+  <div class="kicker">4 · Financement</div>
+  <div class="split">
+    <div class="answers">
+      <h2>Du global à l'individuel</h2>
+      <ul><li>Quote-part par tantièmes</li><li>Aide locale : règle paramétrable, pré-calcul confirmé par le CO</li><li>Éco-PTZ calculé, case « financer », saisie manuelle possible</li><li>Pièces reçues et résultat de l'analyse du CO</li></ul>
+      <div class="replaces">Remplace : BDD PROJET (quotes-parts), ANALYSE FINANCIÈRE</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap"><a class="btn" target="_blank" href="../?vue=spee&page=financement"><i class="ph-light ph-arrow-square-in"></i>Démo SPEE</a><a class="btn outline" target="_blank" href="../?vue=amo&onglet=financement">Vue AMO</a></div>
+    </div>
+    <div class="demo"><div class="frame"></div></div>
+  </div>
+</section>
+
+<!-- 9 -->
+<section class="slide" data-demo="../?vue=spee&page=recap" data-notes="Démo : basculer Tout / Travaux / Honoraires ; montrer la redevance Pass Copro et la facture lue par Marius IA ; extraire. Puis vue AMO › Suivi financier (facturation, versements, appels de fonds) et SPEE › Trésorerie. ❓ Que contient aujourd'hui votre onglet RECAP ? Qui le consulte ?">
+  <div class="kicker">5 · Factures et avancement</div>
+  <div class="split">
+    <div class="answers">
+      <h2>Le RECAP, enfin automatique</h2>
+      <ul><li>% global, travaux et honoraires</li><li>Avancement par lot, avenants compris</li><li>Redevance Pass Copro suivie comme un lot</li><li>Factures lues par <span class="tag ai"><i class="ph-light ph-sparkle"></i>Marius IA</span></li><li>Trésorerie consolidée à 6 mois</li></ul>
+      <div class="replaces">Remplace : SUIVI FACTURATION, tableaux de trésorerie</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap"><a class="btn" target="_blank" href="../?vue=spee&page=recap"><i class="ph-light ph-arrow-square-in"></i>RECAP</a><a class="btn outline" target="_blank" href="../?vue=amo&onglet=suivifin">Suivi financier</a><a class="btn outline" target="_blank" href="../?vue=spee&page=tresorerie">Trésorerie</a></div>
+    </div>
+    <div class="demo"><div class="frame"></div></div>
+  </div>
+</section>
+
+<!-- 10 -->
+<section class="slide" data-notes="Montrer que le chemin d'une facture évite toute ressaisie : le SPEE ne saisit que ce qui relève de sa décision.">
+  <div class="kicker">5 bis · Une facture, une seule saisie</div>
+  <h2>Le chemin d'une facture</h2>
+  <div class="flow" style="margin-top:2vh">
+    <div class="step">L'entreprise dépose la facture</div><i class="ph-light ph-arrow-right"></i>
+    <div class="step">Marius IA la lit et la rattache au lot</div><i class="ph-light ph-arrow-right"></i>
+    <div class="step">Le CO contrôle</div><i class="ph-light ph-arrow-right"></i>
+    <div class="step">Certificat de paiement et appel de fonds pré-remplis</div><i class="ph-light ph-arrow-right"></i>
+    <div class="step">Le SPEE paie dans son système</div><i class="ph-light ph-arrow-right"></i>
+    <div class="step" style="background:var(--p500);color:#fff">RECAP, trésorerie et reporting à jour</div>
+  </div>
+  <p class="lead" style="margin-top:3vh">La facture n'est saisie qu'une fois. Les autres tableaux deviennent des vues de cette facture.</p>
+</section>
+
+<!-- 11 -->
+<section class="slide" data-demo="../?vue=financeur" data-notes="Démo profil Financeur CEMP : poches, produits, accompagnateurs habilités, demandes avec pièces et risque, projets financés. ❓ Ce modèle est-il proche de votre tiers-financement ? Qu'est-ce qui diffère ?">
+  <div class="kicker">6 · Le SPEE financeur</div>
+  <div class="split">
+    <div class="answers">
+      <h2>Votre rôle de financeur a sa vue</h2>
+      <ul><li>Poches de financement et encours</li><li>Produits : éco-PTZ, avance d'aides, prêts affectés</li><li>Demandes avec pièces et indicateurs de risque</li><li>Projets financés : accordé, versé, solde</li></ul>
+      <div class="q"><i class="ph-light ph-question"></i>Ce modèle est-il proche de votre tiers-financement ? Qu'est-ce qui diffère ?</div>
+      <a class="btn" target="_blank" href="../?vue=financeur"><i class="ph-light ph-arrow-square-in"></i>Basculer sur la démo</a>
+    </div>
+    <div class="demo"><div class="frame"></div></div>
+  </div>
+</section>
+
+<!-- 12 -->
+<section class="slide" data-demo="../?vue=spee&page=qualification" data-notes="Démo : passer une note de 1 à 3, cliquer « Paramétrer » et changer un poids, choisir une orientation et un CO, valider. Ce n'est pas un scoring bancaire. ❓ Vos critères actuels sont-ils les bons ? Qui siège en commission ?">
+  <div class="kicker">7 · Entrée dans le parcours</div>
+  <div class="split">
+    <div class="answers">
+      <h2>Qualification et commission</h2>
+      <ul><li>Grille gestion, technique, projet</li><li>Pondération réglable par le SPEE</li><li>Orientation : MOD directe, Urbanis, SOLIHA</li><li>Affectation au chargé d'opération, décision tracée</li></ul>
+      <div class="replaces">Remplace : SCORING QUALIFICATION, tableau des commissions</div>
+      <a class="btn" target="_blank" href="../?vue=spee&page=qualification"><i class="ph-light ph-arrow-square-in"></i>Basculer sur la démo</a>
+    </div>
+    <div class="demo"><div class="frame"></div></div>
+  </div>
+</section>
+
+<!-- 13 -->
+<section class="slide" data-demo="../?vue=spee&page=operateurs" data-notes="Full = vos équipes MOD directe pilotent tout, y compris le financier. Solo = l'opérateur garde son espace et active le parcours qualité HDF ; ses données remontent au compte réseau. Puis Reporting Région. ❓ Quelles données attendez-vous des opérateurs, à quel rythme ?">
+  <div class="kicker">8 · Votre réseau</div>
+  <div class="split">
+    <div class="answers">
+      <h2>Solo, Full et compte réseau</h2>
+      <ul><li><span class="tag dark">Full</span> vos équipes en MOD directe</li><li><span class="tag">Solo</span> Urbanis, SOLIHA : leur organisation, vos données</li><li>Parcours qualité Hauts-de-France, jalons 1-2-3</li><li>Reporting Région par territoire, sans retraitement</li></ul>
+      <div class="q"><i class="ph-light ph-question"></i>Quelles données attendez-vous des opérateurs, à quel rythme ?</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap"><a class="btn" target="_blank" href="../?vue=spee&page=operateurs"><i class="ph-light ph-arrow-square-in"></i>Opérateurs</a><a class="btn outline" target="_blank" href="../?vue=spee&page=reporting">Reporting Région</a></div>
+    </div>
+    <div class="demo"><div class="frame"></div></div>
+  </div>
+</section>
+
+<!-- 14 -->
+<section class="slide" data-notes="Rester factuel sur l'état : Marius IA en cours de développement, ANAH manuel au départ.">
+  <div class="kicker">9 · Ce qui arrive</div>
+  <h2>Les intégrations</h2>
+  <div class="grid g3" style="flex:0">
+    <div class="block"><h3><i class="ph-light ph-sparkle" style="color:var(--ai500)"></i>Marius IA</h3><p style="margin:0">Lecture des audits, devis et factures, puis pré-remplissage du dossier.</p></div>
+    <div class="block"><h3><i class="ph-light ph-signature"></i>Signature électronique</h3><p style="margin:0">Signatures et horodatage tracés dans l'historique.</p></div>
+    <div class="block"><h3><i class="ph-light ph-globe"></i>monprojet.anah.gouv.fr</h3><p style="margin:0">Mise à jour manuelle et alertes au départ, automatique si l'ANAH ouvre une API.</p></div>
+    <div class="block"><h3><i class="ph-light ph-vault"></i>Compte travaux</h3><p style="margin:0">Open banking avec un partenaire bancaire : vue du compte et virements.</p></div>
+    <div class="block"><h3><i class="ph-light ph-seal-check"></i>Séraphin (FIDEO)</h3><p style="margin:0">Référentiel qualité externe embarqué dans le parcours.</p></div>
+    <div class="block"><h3><i class="ph-light ph-lightning"></i>C2E et exports</h3><p style="margin:0">Suivi des CEE, exports Région et tutelles.</p></div>
+  </div>
+</section>
+
+<!-- 15 -->
+<section class="slide" data-demo="../?vue=spee&page=coconstruction" data-notes="Ouvrir la démo en plein écran et remplir en direct. Voter sur chaque piste, noter les commentaires, ajouter les besoins. À la fin : « Extraire les priorités ». Les votes restent dans ce navigateur : ne pas changer d'ordinateur. ❓ Quelle tâche vous prend le plus de temps ? Quelle erreur vous coûte le plus ?">
+  <div class="kicker">10 · Atelier</div>
+  <div class="split">
+    <div class="answers">
+      <h2>On priorise ensemble</h2>
+      <ul><li>Indispensable, utile ou plus tard ?</li><li>Vos commentaires sur chaque piste</li><li>Les besoins qui manquent</li></ul>
+      <div class="q"><i class="ph-light ph-question"></i>Quelle tâche vous prend le plus de temps aujourd'hui ? Quelle erreur vous coûte le plus ?</div>
+      <a class="btn" target="_blank" href="../?vue=spee&page=coconstruction"><i class="ph-light ph-arrow-square-in"></i>Ouvrir l'atelier</a>
+    </div>
+    <div class="demo"><div class="frame"></div></div>
+  </div>
+</section>
+
+<!-- 16 -->
+<section class="slide dark" data-notes="Proposer le pilote et demander un référent par sujet. Annoncer le compte rendu à Lucie.">
+  <div class="kicker">La suite</div>
+  <h2>Construire avec vous</h2>
+  <div class="flow" style="margin-top:2vh">
+    <div class="step" style="background:var(--p700)">Atelier</div><i class="ph-light ph-arrow-right"></i>
+    <div class="step" style="background:var(--p700)">Spécification</div><i class="ph-light ph-arrow-right"></i>
+    <div class="step" style="background:var(--p700)">Prototype</div><i class="ph-light ph-arrow-right"></i>
+    <div class="step" style="background:var(--p700)">Votre validation</div><i class="ph-light ph-arrow-right"></i>
+    <div class="step" style="background:var(--p700)">Développement</div><i class="ph-light ph-arrow-right"></i>
+    <div class="step" style="background:var(--s500);color:var(--p900)">Tests</div>
+  </div>
+  <div class="grid g3" style="flex:0;margin-top:3vh">
+    <div><h3>Un pilote</h3><p>Sur 2 ou 3 copropriétés, avec un référent par sujet chez vous.</p></div>
+    <div><h3>Un compte rendu</h3><p>Vos priorités de l'atelier, envoyées à Lucie.</p></div>
+    <div><h3>Prochain atelier</h3><p>Sur le sujet arrivé en tête, avec vos documents : modèle RECAP, reporting Région, règles d'aides locales.</p></div>
+  </div>
+</section>
+
+</div>
+
+<div class="notes" id="notes"><h4>Notes de l'orateur (touche N)</h4><div id="notesTxt"></div></div>
+<div class="nav"><button id="prev" title="Précédent">‹</button><button id="nbtn" title="Notes (N)"><i class="ph-light ph-note"></i></button><button id="fs" title="Plein écran (F)"><i class="ph-light ph-arrows-out"></i></button><button id="next" title="Suivant">›</button></div>
+
+<script>
+const slides=[...document.querySelectorAll('.slide')];
+slides.forEach((s,i)=>{const f=document.createElement('div');f.className='foot';f.innerHTML=`<span>Marius Copro × SPEE Hauts-de-France</span><span>${i+1} / ${slides.length}</span>`;s.appendChild(f);const p=document.createElement('div');p.className='progress';p.style.width=((i+1)/slides.length*100)+'%';s.appendChild(p);});
+let cur=0;
+function show(i){cur=Math.max(0,Math.min(slides.length-1,i));slides.forEach((s,k)=>s.classList.toggle('active',k===cur));
+  const s=slides[cur];const fr=s.querySelector('.frame');
+  if(fr&&s.dataset.demo&&!fr.querySelector('iframe')){fr.innerHTML='<div class="ph">Chargement de la démo…</div>';const ifr=document.createElement('iframe');ifr.src=s.dataset.demo;ifr.loading='lazy';ifr.onload=()=>{const ph=fr.querySelector('.ph');ph&&ph.remove();};fr.appendChild(ifr);}
+  document.getElementById('notesTxt').textContent=s.dataset.notes||'—';history.replaceState(null,'','#'+(cur+1));}
+document.getElementById('prev').onclick=()=>show(cur-1);document.getElementById('next').onclick=()=>show(cur+1);
+const toggleNotes=()=>document.getElementById('notes').classList.toggle('on');
+document.getElementById('nbtn').onclick=toggleNotes;
+const fs=()=>document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen();
+document.getElementById('fs').onclick=fs;
+document.addEventListener('keydown',e=>{if(['ArrowRight','PageDown',' '].includes(e.key)){e.preventDefault();show(cur+1);}else if(['ArrowLeft','PageUp'].includes(e.key)){e.preventDefault();show(cur-1);}else if(e.key==='n'||e.key==='N')toggleNotes();else if(e.key==='f'||e.key==='F')fs();else if(e.key==='Home')show(0);else if(e.key==='End')show(slides.length-1);});
+show((parseInt(location.hash.slice(1))||1)-1);
+</script>
+</body>
+</html>

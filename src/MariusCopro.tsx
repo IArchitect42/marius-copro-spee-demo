@@ -9431,7 +9431,7 @@ function SuiviFinancierSyndic() {
 // ─── APP ─────────────────────────────────────────────────
 export default function MariusCopro() {
   useMariusAssets();
-  const [tab, setTab] = useState<Tab>("lacopro");
+  const [tab, setTab] = useState<Tab>(()=>(new URLSearchParams(window.location.search).get("onglet")||"lacopro") as Tab);
   const [amoPage, setAmoPage] = useState<"portfolio"|"detail">("detail");
   const [amoSection, setAmoSection] = useState<"mission"|"clients"|"demandes"|"collaborateurs"|"calendrier">("mission");
 
@@ -9476,7 +9476,7 @@ export default function MariusCopro() {
 
   // ─── Vue Financeur CEMP ─────────────────────────────────────────────────
   type FinanceurPage = "dashboard"|"poches"|"produits"|"accompagnateurs"|"demandes"|"projets"|"collaborateurs";
-  const [finPage, setFinPage] = useState<FinanceurPage>("dashboard");
+  const [finPage, setFinPage] = useState<FinanceurPage>(()=>(new URLSearchParams(window.location.search).get("page")||"dashboard") as FinanceurPage);
   const [finProjetOpen, setFinProjetOpen] = useState(true);
 
   // ── Produits financiers — données et état d'édition ──────────────────────

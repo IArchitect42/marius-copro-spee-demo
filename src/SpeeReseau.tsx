@@ -33,7 +33,7 @@ export const COPROS: Copro[] = (() => {
 // ── Shell de la vue ───────────────────────────────────────────────────
 export type Profile = { mode: string; ini: string; bg: string; label: string; sub: string };
 export default function SpeeView({ profiles, onSwitch }: { profiles: Profile[]; onSwitch: (mode: string) => void }) {
-  const [page, setPage] = useState<Page>("portefeuille");
+  const [page, setPage] = useState<Page>(() => (new URLSearchParams(window.location.search).get("page") || "portefeuille") as Page);
   const [menu, setMenu] = useState(false);
   const [selCopro, setSelCopro] = useState("C001");
   const MENU: { section: string; items: { p: Page; label: string; icon: string; badge?: string }[] }[] = [
