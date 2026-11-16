@@ -11,6 +11,7 @@ const params = () => new URLSearchParams(window.location.search);
 const ctx = () => { const p = params(); return { vue: p.get("vue") || "amo", page: p.get("page") || "", onglet: p.get("onglet") || "" }; };
 
 const SUGG: Record<string, string[]> = {
+  light: ["Où en est le jalon 2 ?", "Quelles pièces manquent pour le SPEE ?", "Qui n'a pas répondu à l'enquête sociale ?"],
   spee: ["Quelles copros ont une alerte ?", "Besoin de trésorerie le mois prochain ?", "Où en est la Résidence Vauban ?", "Prépare le reporting Région"],
   amo: ["Où en est le dossier ?", "Quel est le reste à charge ?", "Qui n'a pas répondu à l'enquête sociale ?", "Prépare l'appel de fonds n°3"],
   syndic: ["Quelles factures dois-je valider ?", "Prochaine AG ?", "Montant du prochain appel de fonds ?"],
@@ -23,6 +24,7 @@ const SUGG: Record<string, string[]> = {
 function answer(q: string, vue: string): Msg {
   const s = q.toLowerCase(); const id = Date.now();
   const has = (...w: string[]) => w.some(x => s.includes(x));
+  if (has("jalon", "pièces manquent", "pieces manquent")) return { id, from: "ia", text: "Jalon 2 · Programme : 3 éléments sur 4. Il manque les attestations RGE des entreprises. Dès qu'elles sont déposées, vous pourrez transmettre le jalon au SPEE.", actions: ["Ouvrir le parcours qualité"] };
   if (has("alerte")) return { id, from: "ia", text: "18 copropriétés ont une alerte ouverte. Les plus urgentes :\n• Résidence Vauban (Lille) : facture THERMIS BTP à valider\n• 4 dossiers : pièces de l'enquête sociale manquantes\n• 3 dossiers : retard sur le jalon qualité 2\nJe peux filtrer le portefeuille sur ces dossiers.", actions: ["Filtrer le portefeuille", "Exporter la liste"] };
   if (has("trésorerie", "tresorerie", "mois prochain")) return { id, from: "ia", text: "Projection de janvier 2027, tout le portefeuille :\n• factures à payer : environ 520 000 €\n• aides attendues : environ 310 000 €\n• appels de fonds : environ 105 000 €\nBesoin net de préfinancement : environ 60 000 €, porté surtout par 3 chantiers en MOD directe.", actions: ["Voir la trésorerie"] };
   if (has("reporting", "région", "region")) return { id, from: "ia", text: "Je prépare l'export Région : 80 copropriétés, logements, travaux engagés et avancement par territoire. Les indicateurs PAI SDFR et ESMA REE restent à définir avec vous : je les laisse en colonnes vides.", actions: ["Télécharger le brouillon (CSV)"] };

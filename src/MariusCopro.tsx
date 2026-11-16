@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { useFile } from "@dust/react-hooks";
 import SpeeView from "./SpeeReseau";
 import DepotIA, { DepotResult } from "./DepotIA";
+import { LIGHT_LOCKED, LightBanner, LockedTab, ParcoursQualiteLight } from "./LightAccess";
 import { CheckCircle2, Clock, AlertCircle, Send, FileText, Info, Banknote } from "lucide-react";
 
 // ─── COULEURS MARIUS EXACTES (depuis bootstrapmarius.min.css) ───
@@ -9455,7 +9456,7 @@ export default function MariusCopro() {
   const [amoSection, setAmoSection] = useState<"mission"|"clients"|"demandes"|"collaborateurs"|"calendrier">("mission");
 
   // Vue active (AMO ou Financeur)
-  type ViewMode = "amo" | "financeur" | "conseil" | "copro" | "syndic" | "moe" | "spee";
+  type ViewMode = "amo" | "financeur" | "conseil" | "copro" | "syndic" | "moe" | "spee" | "light";
   const [viewMode,    setViewMode]    = useState<ViewMode>(()=>{const v=new URLSearchParams(window.location.search).get("vue");return (v||"amo") as ViewMode;});
   useEffect(()=>{const u=new URL(window.location.href);u.searchParams.set("vue",viewMode);window.history.replaceState(null,"",u.toString());},[viewMode]);
   const [userMenuOpen,setUserMenuOpen]= useState(false);
@@ -11340,6 +11341,7 @@ export default function MariusCopro() {
               {([
                 {mode:"amo"      as ViewMode,ini:"SR",bg:C.secondary,label:"Sebastian Ruiz",       sub:"AMO Copro · Marius Rénov'"},
                 {mode:"spee"     as ViewMode,ini:"HDF",bg:"#13252D",label:"SPEE Hauts-de-France",  sub:"Compte réseau · Pôle copropriétés"},
+                {mode:"light"    as ViewMode,ini:"UR",bg:"#73909C",label:"Urbanis · Claire Martin",sub:"AMO Light Équipe · sous pacte SPEE"},
                 {mode:"financeur"as ViewMode,ini:"CE",bg:"#F57C00",  label:"Financeur CEMP",       sub:"Caisse d'Épargne Midi-Pyrénées"},
                 {mode:"conseil"  as ViewMode,ini:"CS",bg:"#388E3C",  label:"Conseil Syndical",     sub:"La Résidence Vauban"},
                 {mode:"syndic"   as ViewMode,ini:"SY",bg:"#587A89",  label:"Syndic Cabinet Lecomte",sub:"Gestionnaire de la copropriété"},
@@ -11504,6 +11506,7 @@ export default function MariusCopro() {
                 {([
                   {mode:"amo"      as ViewMode,ini:"SR",bg:C.secondary,label:"Sebastian Ruiz",       sub:"AMO Copro · Marius Rénov'"},
                   {mode:"spee"     as ViewMode,ini:"HDF",bg:"#13252D",label:"SPEE Hauts-de-France",  sub:"Compte réseau · Pôle copropriétés"},
+                  {mode:"light"    as ViewMode,ini:"UR",bg:"#73909C",label:"Urbanis · Claire Martin",sub:"AMO Light Équipe · sous pacte SPEE"},
                   {mode:"financeur"as ViewMode,ini:"CE",bg:"#F57C00",  label:"Financeur CEMP",       sub:"Caisse d'Épargne Midi-Pyrénées"},
                   {mode:"conseil"  as ViewMode,ini:"CS",bg:"#388E3C",  label:"Conseil Syndical",     sub:"La Résidence Vauban"},
                   {mode:"syndic"   as ViewMode,ini:"SY",bg:SYN_COLOR,  label:"Syndic Cabinet Lecomte",sub:"Gestionnaire de la copropriété"},
@@ -12514,6 +12517,7 @@ export default function MariusCopro() {
               {([
                 {mode:"amo"      as ViewMode,ini:"SR",bg:C.secondary,label:"Sebastian Ruiz",       sub:"AMO Copro · Marius Rénov'"},
                 {mode:"spee"     as ViewMode,ini:"HDF",bg:"#13252D",label:"SPEE Hauts-de-France",  sub:"Compte réseau · Pôle copropriétés"},
+                {mode:"light"    as ViewMode,ini:"UR",bg:"#73909C",label:"Urbanis · Claire Martin",sub:"AMO Light Équipe · sous pacte SPEE"},
                 {mode:"financeur"as ViewMode,ini:"CE",bg:"#F57C00",  label:"Financeur CEMP",       sub:"Caisse d'Épargne Midi-Pyrénées"},
                 {mode:"conseil"  as ViewMode,ini:"CS",bg:"#388E3C",  label:"Conseil Syndical",     sub:"La Résidence Vauban"},
                 {mode:"syndic"   as ViewMode,ini:"SY",bg:"#587A89",  label:"Syndic Cabinet Lecomte",sub:"Gestionnaire de la copropriété"},
@@ -12624,6 +12628,7 @@ export default function MariusCopro() {
               {([
                 {mode:"amo"      as ViewMode,ini:"SR",bg:C.secondary,label:"Sebastian Ruiz",       sub:"AMO Copro · Marius Rénov'"},
                 {mode:"spee"     as ViewMode,ini:"HDF",bg:"#13252D",label:"SPEE Hauts-de-France",  sub:"Compte réseau · Pôle copropriétés"},
+                {mode:"light"    as ViewMode,ini:"UR",bg:"#73909C",label:"Urbanis · Claire Martin",sub:"AMO Light Équipe · sous pacte SPEE"},
                 {mode:"financeur"as ViewMode,ini:"CE",bg:"#F57C00",  label:"Financeur CEMP",       sub:"Caisse d'Épargne Midi-Pyrénées"},
                 {mode:"conseil"  as ViewMode,ini:"CS",bg:"#388E3C",  label:"Conseil Syndical",     sub:"La Résidence Vauban"},
                 {mode:"syndic"   as ViewMode,ini:"SY",bg:"#587A89",  label:"Syndic Cabinet Lecomte",sub:"Gestionnaire de la copropriété"},
@@ -14999,9 +15004,11 @@ export default function MariusCopro() {
   );
 
 
+  if(viewMode==="light"){COPRO.nom="Résidence Les Tilleuls";COPRO.adresse="8 rue de l'Épeule, 59100 Roubaix";}else{COPRO.nom="La Résidence Vauban";COPRO.adresse="24 rue Gambetta, 59000 Lille";}
   if(viewMode==="spee") return <SpeeView onSwitch={(m)=>setViewMode(m as ViewMode)} profiles={[
     {mode:"spee",ini:"HDF",bg:"#13252D",label:"SPEE Hauts-de-France",sub:"Compte réseau · Pôle copropriétés"},
     {mode:"amo",ini:"SR",bg:C.secondary,label:"Sebastian Ruiz",sub:"AMO Copro · Marius Rénov'"},
+    {mode:"light",ini:"UR",bg:"#73909C",label:"Urbanis · Claire Martin",sub:"AMO Light Équipe · sous pacte SPEE"},
     {mode:"financeur",ini:"CE",bg:"#F57C00",label:"Financeur CEMP",sub:"Caisse d'Épargne Midi-Pyrénées"},
     {mode:"conseil",ini:"CS",bg:"#388E3C",label:"Conseil Syndical",sub:"La Résidence Vauban"},
     {mode:"syndic",ini:"SY",bg:"#587A89",label:"Syndic Cabinet Lecomte",sub:"Gestionnaire de la copropriété"},
@@ -15149,6 +15156,7 @@ export default function MariusCopro() {
                 {([
                   {mode:"amo"      as ViewMode,ini:"SR",bg:C.secondary,label:"Sebastian Ruiz",       sub:"AMO Copro · Marius Rénov'"},
                   {mode:"spee"     as ViewMode,ini:"HDF",bg:"#13252D",label:"SPEE Hauts-de-France",  sub:"Compte réseau · Pôle copropriétés"},
+                  {mode:"light"    as ViewMode,ini:"UR",bg:"#73909C",label:"Urbanis · Claire Martin",sub:"AMO Light Équipe · sous pacte SPEE"},
                   {mode:"financeur"as ViewMode,ini:"CE",bg:"#F57C00",  label:"Financeur CEMP",       sub:"Caisse d'Épargne Midi-Pyrénées"},
                   {mode:"conseil"  as ViewMode,ini:"CS",bg:"#388E3C",  label:"Conseil Syndical",     sub:"La Résidence Vauban"},
                   {mode:"syndic"   as ViewMode,ini:"SY",bg:"#587A89",  label:"Syndic Cabinet Lecomte",sub:"Gestionnaire de la copropriété"},
@@ -15836,6 +15844,7 @@ export default function MariusCopro() {
               {([
                 {mode:"amo"      as ViewMode,ini:"SR",bg:C.secondary,label:"Sebastian Ruiz",       sub:"AMO Copro · Marius Rénov'"},
                 {mode:"spee"     as ViewMode,ini:"HDF",bg:"#13252D",label:"SPEE Hauts-de-France",  sub:"Compte réseau · Pôle copropriétés"},
+                {mode:"light"    as ViewMode,ini:"UR",bg:"#73909C",label:"Urbanis · Claire Martin",sub:"AMO Light Équipe · sous pacte SPEE"},
                 {mode:"financeur"as ViewMode,ini:"CE",bg:"#F57C00",  label:"Financeur CEMP",       sub:"Caisse d'Épargne Midi-Pyrénées"},
                 {mode:"conseil"  as ViewMode,ini:"CS",bg:"#388E3C",  label:"Conseil Syndical",     sub:"La Résidence Vauban"},
                 {mode:"syndic"   as ViewMode,ini:"SY",bg:"#587A89",  label:"Syndic Cabinet Lecomte",sub:"Gestionnaire de la copropriété"},
@@ -15857,7 +15866,9 @@ export default function MariusCopro() {
             onClick={()=>setUserMenuOpen(!userMenuOpen)}
             style={{display:"flex",alignItems:"center",gap:"12px",width:"100%",background:userMenuOpen?"#E6F3FA":"none",border:"none",cursor:"pointer",padding:"8px 8px",borderRadius:"8px",transition:"background 0.15s"}}
           >
-            {viewMode==="amo" ? (
+            {viewMode==="light" ? (
+              <div style={{width:"32px",height:"32px",borderRadius:"50%",flexShrink:0,background:"#73909C",display:"flex",alignItems:"center",justifyContent:"center",color:"#FFFFFF",fontSize:"12px",fontWeight:700}}>UR</div>
+            ) : viewMode==="amo" ? (
               <div style={{width:"32px",height:"32px",borderRadius:"50%",border:"2px solid #BECCD1",flexShrink:0,background:C.secondary,display:"flex",alignItems:"center",justifyContent:"center",color:"#FFFFFF",fontSize:"12px",fontWeight:700,overflow:"hidden"}}>
                 {avatarUrl ? <img src={avatarUrl} style={{width:"100%",height:"100%",objectFit:"cover"}}/> : "SR"}
               </div>
@@ -15867,7 +15878,10 @@ export default function MariusCopro() {
               </div>
             )}
             <div style={{textAlign:"left",overflow:"hidden",flex:1}}>
-              {viewMode==="amo" ? <>
+              {viewMode==="light" ? <>
+                <div style={{fontSize:"12px",fontWeight:600,color:C.primary,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>Claire Martin</div>
+                <div style={{fontSize:"10px",color:C.secondary,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>Urbanis · AMO Light Équipe</div>
+              </> : viewMode==="amo" ? <>
                 <div style={{fontSize:"12px",fontWeight:600,color:C.primary,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>Sebastian Ruiz</div>
                 <div style={{fontSize:"10px",color:C.secondary,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>Atelier d'Architecture Tripode</div>
               </> : <>
@@ -15922,12 +15936,12 @@ export default function MariusCopro() {
           {/* Tabs — masqués en vue portfolio multi-copros */}
           {amoPage==="detail"&&amoSection==="mission"&&<div style={{padding:"0 24px",marginTop:"4px"}}>
             <div role="tablist" style={{display:"flex",overflowX:"auto"}}>
-              {TABS.map(t=>{
+              {(viewMode==="light"?[...TABS.map(t=>LIGHT_LOCKED.includes(t.id)?{...t,on:false}:t),{id:"qualite" as Tab,icon:"ph-seal-check",label:"Parcours qualité",on:true}]:TABS).map(t=>{
                 const active=tab===t.id;
                 return (
                   <div key={t.id} style={{flexShrink:0}}>
-                    <button role="tab" aria-selected={active} disabled={!t.on}
-                      onClick={()=>t.on&&setTab(t.id)}
+                    <button role="tab" aria-selected={active} disabled={!t.on&&viewMode!=="light"}
+                      onClick={()=>(t.on||viewMode==="light")&&setTab(t.id)}
                       style={{fontFamily:"Montserrat,sans-serif",
                         display:"flex",alignItems:"center",gap:"4px",
                         padding:"12px 16px 8px",fontSize:"14px",
@@ -15940,6 +15954,7 @@ export default function MariusCopro() {
                       }}>
                       <i className={`ph-light ${t.icon}`} style={{fontSize:"14px"}}/>
                       {t.label}
+                      {!t.on&&viewMode==="light"&&<i className="ph-light ph-lock-simple" title="Non inclus dans le compte Light" style={{fontSize:"12px"}}/>}
                       
                     </button>
                   </div>
@@ -16240,13 +16255,16 @@ export default function MariusCopro() {
         })()}
         {/* Contenu - vue detail */}
         {amoPage==="detail"&&amoSection==="mission"&&<div style={{flex:1,overflowY:"auto",background:"#FBFBFB"}}>
-          {tab==="suivifin"&&<SuiviFinancierTab/>}
+          {viewMode==="light"&&<LightBanner/>}
+          {tab==="qualite"&&<ParcoursQualiteLight/>}
+          {viewMode==="light"&&LIGHT_LOCKED.includes(tab)&&<LockedTab label={TABS.find(x=>x.id===tab)?.label||""}/>}
+          {viewMode!=="light"&&tab==="suivifin"&&<SuiviFinancierTab/>}
           {tab==="messagerie"&&<MessagerieTab/>}
-          {tab==="newsletter"&&<NewsletterTab/>}
+          {viewMode!=="light"&&tab==="newsletter"&&<NewsletterTab/>}
           {tab==="lacopro"&&<LaCoprTab/>}
           {tab==="projet"&&<ProjetTab/>}
           {tab==="mission"&&<MissionTab/>}
-          {tab==="financement"&&<FinancementTab/>}
+          {viewMode!=="light"&&tab==="financement"&&<FinancementTab/>}
           {tab==="documents"&&<DocumentsTab/>}
           {tab==="historique"&&<HistoriqueTab/>}
           {tab==="intervenants"&&<IntervenantsTab/>}

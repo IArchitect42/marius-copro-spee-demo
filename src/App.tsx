@@ -1,3 +1,4 @@
 import MariusCopro from "./MariusCopro";
 import MariusIA from "./MariusIA";
-export default function App() { return (<><MariusCopro /><MariusIA /></>); }
+import LightRename from "./LightRename";
+export default function App() { return (<><MariusCopro /><MariusIA /><LightRename /></>); }

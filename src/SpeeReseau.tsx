@@ -11,7 +11,7 @@ function rng(seed: number) { return () => { seed = (seed * 16807) % 2147483647; 
 const VILLES: [string, string][] = [["Lille", "MEL"], ["Roubaix", "MEL"], ["Tourcoing", "MEL"], ["Villeneuve-d'Ascq", "MEL"], ["Lens", "Pas-de-Calais"], ["Arras", "Pas-de-Calais"], ["Calais", "Pas-de-Calais"], ["Boulogne-sur-Mer", "Pas-de-Calais"], ["Douai", "Nord"], ["Valenciennes", "Nord"], ["Dunkerque", "Nord"], ["Maubeuge", "Nord"], ["Amiens", "Somme"], ["Abbeville", "Somme"], ["Beauvais", "Oise"], ["Compiègne", "Oise"], ["Creil", "Oise"], ["Saint-Quentin", "Aisne"], ["Laon", "Aisne"]];
 const NOMS = ["Les Tilleuls", "Le Beffroi", "Les Hortensias", "Le Parc", "Les Acacias", "Jean Jaurès", "Les Peupliers", "La Citadelle", "Le Belvédère", "Les Glycines", "Victor Hugo", "Le Square", "Les Marronniers", "La Roseraie", "Le Cèdre", "Les Charmilles", "Le Moulin", "Pasteur", "Les Iris", "La Colline"];
 export const PHASES = ["0 · Identification", "1 · Diagnostic", "2 · Études", "3 · AG & dépôt", "4 · Montage financier", "5 · Chantier", "6 · Réception", "7 · Post-travaux"];
-type Copro = { id: string; nom: string; ville: string; terr: string; lots: number; mode: "Full" | "Solo"; operateur: string; co: string; phase: number; avTravaux: number; avHono: number; budget: number; rac: number; dpe: string; alerte?: string; vauban?: boolean };
+type Copro = { id: string; nom: string; ville: string; terr: string; lots: number; mode: "Full" | "Solo"; operateur: string; co: string; phase: number; avTravaux: number; avHono: number; budget: number; rac: number; dpe: string; alerte?: string; vauban?: boolean; light?: boolean };
 const COS = ["Claire V.", "Mathieu P.", "Thomas R.", "Inès B.", "Karim L."];
 export const COPROS: Copro[] = (() => {
   const r = rng(42); const out: Copro[] = [];
@@ -27,6 +27,7 @@ export const COPROS: Copro[] = (() => {
       operateur: solo ? (r() < 0.55 ? "Urbanis" : "SOLIHA") : "SPEE (MOD directe)", co: solo ? "—" : COS[Math.floor(r() * COS.length)], phase, avTravaux: avT, avHono: avH,
       budget, rac: Math.round(budget * (0.25 + r() * 0.2)), dpe: ["F → C", "E → C", "G → D", "E → B", "F → D"][Math.floor(r() * 5)], alerte: r() < 0.22 ? alerts[Math.floor(r() * alerts.length)] : undefined });
   }
+  Object.assign(out[1], { nom: "Résidence Les Tilleuls", ville: "Roubaix", terr: "MEL", lots: 12, budget: 290950, rac: 101808, mode: "Solo", operateur: "Urbanis", co: "—", phase: 5, avTravaux: 35, avHono: 58, dpe: "F → C", alerte: "Jalon qualité 2 à transmettre", light: true });
   return out;
 })();
 
@@ -88,7 +89,7 @@ export default function SpeeView({ profiles, onSwitch }: { profiles: Profile[]; 
       </nav>
       <main style={{ flex: 1, overflowY: "auto", background: T.white }}>
         <div style={{ maxWidth: 1280, margin: "0 auto", padding: "32px 40px 64px", display: "flex", flexDirection: "column", gap: 32 }}>
-          {page === "portefeuille" && <Portefeuille go={go} onOpenVauban={() => onSwitch("amo")} />}
+          {page === "portefeuille" && <Portefeuille go={go} onOpenVauban={() => onSwitch("amo")} onOpenLight={() => onSwitch("light")} />}
           {page === "recap" && <Recap coproId={selCopro} setCopro={setSelCopro} />}
           {page === "qualification" && <Qualification />}
           {page === "financement" && <Financement />}
@@ -120,7 +121,7 @@ const Stat = ({ k, v, sub, tone }: { k: string; v: string; sub?: string; tone?: 
 const phaseTag = (p: number): TagStatus => p >= 7 ? "Success" : p >= 5 ? "Info" : p >= 3 ? "Light" : "Grey";
 
 // ── 1. Portefeuille ───────────────────────────────────────────────────
-export function Portefeuille({ go, onOpenVauban }: { go: (p: Page, c?: string) => void; onOpenVauban: () => void }) {
+export function Portefeuille({ go, onOpenVauban, onOpenLight }: { go: (p: Page, c?: string) => void; onOpenVauban: () => void; onOpenLight?: () => void }) {
   const [q, setQ] = useState(""); const [mode, setMode] = useState<"all" | "Full" | "Solo">("all");
   const [terr, setTerr] = useState("all"); const [phase, setPhase] = useState("all"); const [alert, setAlert] = useState(false);
   const rows = COPROS.filter(c => (mode === "all" || c.mode === mode) && (terr === "all" || c.terr === terr) && (phase === "all" || String(c.phase) === phase) && (!alert || c.alerte)
@@ -155,7 +156,7 @@ export function Portefeuille({ go, onOpenVauban }: { go: (p: Page, c?: string) =
         <table style={{ width: "100%", borderCollapse: "collapse" }}>
           <thead style={{ position: "sticky", top: 0 }}><tr>{["Copropriété", "Mode", "Phase", "Avancement travaux", "Honoraires", "Reste à charge", "Alerte", ""].map(h => <th key={h} style={th}>{h}</th>)}</tr></thead>
           <tbody>{rows.map(c => (
-            <tr key={c.id} style={{ background: c.vauban ? T.b50 : T.white }}>
+            <tr key={c.id} style={{ background: c.vauban || c.light ? T.b50 : T.white }}>
               <td style={td}><div style={{ fontWeight: 700 }}>{c.nom}</div><div style={txt.bodyXS}>{c.ville} · {c.lots} lots · DPE {c.dpe}</div></td>
               <td style={td}><Tag label={c.mode === "Full" ? "Full · MOD" : `Solo · ${c.operateur}`} status={c.mode === "Full" ? "Dark" : "Light"} /><div style={{ ...txt.bodyXS, marginTop: 4 }}>{c.co !== "—" ? `CO : ${c.co}` : ""}</div></td>
               <td style={td}><Tag label={PHASES[c.phase]} status={phaseTag(c.phase)} /></td>
@@ -167,6 +168,7 @@ export function Portefeuille({ go, onOpenVauban }: { go: (p: Page, c?: string) =
                 <span style={{ display: "inline-flex", gap: 4 }}>
                   <Button size="Tiny" aspect="Outline" icon="list-checks" title="RECAP avancement" onClick={() => go("recap", c.id)} />
                   {c.vauban && <Button size="Tiny" aspect="Plain" label="Ouvrir le dossier" iconRight="arrow-right" onClick={onOpenVauban} />}
+                  {c.light && <Button size="Tiny" aspect="Outline" label="Vue Urbanis (Light)" iconRight="arrow-right" onClick={onOpenLight} />}
                 </span>
               </td>
             </tr>))}</tbody>
