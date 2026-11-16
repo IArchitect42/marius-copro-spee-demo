@@ -99,9 +99,21 @@ function extract(kind: DocKind, hint: string): { fields: Fld[]; by: string; mont
         { k: "Lot", v: "6 · Mme Duquesnoy" }, { k: "Revenu fiscal de référence", v: "17 920 €" }, { k: "Nombre de parts", v: "1" },
         { k: "Année des revenus", v: "2025" }, { k: "Catégorie de ressources", v: "Très modeste (TMO)", warn: "Catégorie auparavant « inconnue » : prime individuelle de 3 000 € à ajouter" },
       ] };
-    case "anah": return { by: "ANAH", montant: "48 080 €", name: "Notification de versement du solde ANAH", dest: "Financement › aides collectives",
-      resume: "Le solde ANAH est rapproché de la notification d'octroi (160 267 €). La trésorerie du projet est mise à jour.",
-      fields: [{ k: "Aide", v: "MaPrimeRénov' Copropriété" }, { k: "Montant versé", v: "48 080 €" }, { k: "Cumul versé / octroyé", v: "160 267 € / 160 267 €" }, { k: "Date de versement", v: "15/07/2026" }] };
+    case "anah": return { by: "ANAH", montant: "48 080 €", name: "Courrier ANAH — versement du solde MaPrimeRénov' Copropriété", dest: "Financement › aides collectives · Suivi financier › versements",
+      resume: "Courrier de versement du solde reconnu et rapproché de la notification d'octroi. La trésorerie du projet et le RECAP sont mis à jour.",
+      fields: [
+        { group: "Identification", k: "Référence du dossier ANAH", v: "MPRC-59-2025-001842" },
+        { group: "Identification", k: "Date du courrier", v: "15/07/2026" },
+        { group: "Identification", k: "Bénéficiaire", v: "Syndicat des copropriétaires Résidence Vauban, représenté par le Cabinet Lecomte" },
+        { group: "Identification", k: "Aide concernée", v: "MaPrimeRénov' Copropriété (45 %)", ok: "Correspond à la notification d'octroi du 20/11/2025" },
+        { group: "Montants", k: "Montant octroyé", v: "160 267 €" },
+        { group: "Montants", k: "Acomptes déjà versés", v: "112 187 € (2 acomptes, 70 %)" },
+        { group: "Montants", k: "Montant du solde versé", v: "48 080 €" },
+        { group: "Montants", k: "Cumul versé", v: "160 267 €", ok: "Cumul = montant octroyé : aide soldée" },
+        { group: "Versement", k: "Date de versement", v: "18/07/2026" },
+        { group: "Versement", k: "Compte destinataire", v: "Compte travaux du syndicat · FR76 •••• 4521" },
+        { group: "Versement", k: "Condition du solde", v: "PV de réception et factures acquittées transmis", warn: "PV de réception de l'ITE pas encore déposé dans Marius : à rattacher au dossier" },
+      ] };
     default: return { by: "AMO Copro", name: hint || "Document", dest: "Documents", resume: "Type non reconnu avec certitude : choisissez le type pour lancer l'extraction adaptée.", fields: [{ k: "Titre détecté", v: hint || "—" }] };
   }
 }

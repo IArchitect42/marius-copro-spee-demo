@@ -71,6 +71,9 @@ td{padding:1vh 1.4vh;border-bottom:1px solid var(--n300)}
 .role .av{width:5vh;height:5vh;min-width:36px;min-height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:clamp(11px,1.6vh,15px);flex-shrink:0}
 .role b{font-family:Montserrat,sans-serif;font-size:clamp(13px,2vh,19px)}
 .role span{display:block;font-size:clamp(12px,1.75vh,17px);color:var(--n800);line-height:1.35;margin-top:2px}
+.docsw{display:flex;justify-content:flex-end;gap:6px;flex-wrap:wrap}
+.docsw button{height:28px;padding:0 12px;border-radius:14px;border:1px solid var(--ai500);background:#fff;color:var(--ai500);font-family:Montserrat,sans-serif;font-weight:600;font-size:12px;cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+.docsw button.on{background:var(--ai500);color:#fff}
 </style>
 </head>
 <body>
@@ -172,7 +175,13 @@ td{padding:1vh 1.4vh;border-bottom:1px solid var(--n300)}
       <div class="replaces">Remplace : dossiers OneDrive / SharePoint, pièces par mail, ressaisie</div>
       <a class="btn" target="_blank" href="../?vue=amo&onglet=documents"><i class="ph-light ph-arrow-square-in"></i>Basculer sur la démo</a>
     </div>
-    <div class="demo"><div class="frame"></div></div>
+    <div class="demo"><div class="docsw" data-docsw>
+        <button data-c="facture"><i class="ph-light ph-receipt"></i>Facture</button>
+        <button data-c="pv"><i class="ph-light ph-clipboard-text"></i>PV de réception</button>
+        <button data-c="audit" class="on"><i class="ph-light ph-lightning"></i>Audit énergétique</button>
+        <button data-c="avis"><i class="ph-light ph-identification-card"></i>Avis d'impôt</button>
+        <button data-c="anah"><i class="ph-light ph-bank"></i>Courrier ANAH</button>
+      </div><div class="frame"></div></div>
   </div>
 </section>
 
@@ -351,6 +360,7 @@ document.getElementById('nbtn').onclick=toggleNotes;
 const fs=()=>document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen();
 document.getElementById('fs').onclick=fs;
 document.addEventListener('keydown',e=>{if(['ArrowRight','PageDown',' '].includes(e.key)){e.preventDefault();show(cur+1);}else if(['ArrowLeft','PageUp'].includes(e.key)){e.preventDefault();show(cur-1);}else if(e.key==='n'||e.key==='N')toggleNotes();else if(e.key==='f'||e.key==='F')fs();else if(e.key==='Home')show(0);else if(e.key==='End')show(slides.length-1);});
+document.querySelectorAll('[data-docsw]').forEach(bar=>{bar.querySelectorAll('button').forEach(btn=>btn.addEventListener('click',e=>{e.stopPropagation();bar.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===btn));const sl=bar.closest('.slide');sl.dataset.demo='../?cadre='+btn.dataset.c;const fr=sl.querySelector('.frame');fr.innerHTML='';show(cur);}));});
 show((parseInt(location.hash.slice(1))||1)-1);
 </script>
 </body>

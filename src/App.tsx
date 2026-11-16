@@ -10,6 +10,7 @@ const CADRES: Record<string, { slot?: string; file: string }> = {
   audit: { file: "audit-energetique-copro-vauban.pdf" },
   pv: { slot: "PV réception ITE · Réalisation des travaux", file: "pv-reception-ite.pdf" },
   avis: { file: "avis-imposition-lot6.pdf" },
+  anah: { file: "courrier-anah-versement-solde.pdf" },
 };
 function Cadre({ k }: { k: string }) {
   const c = CADRES[k] || CADRES.facture;
